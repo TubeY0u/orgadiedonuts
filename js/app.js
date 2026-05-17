@@ -776,28 +776,49 @@ function initNoteForm() {
 }
 
 /* ─── INIT ────────────────────────────────────────────────── */
-document.addEventListener('DOMContentLoaded', () => {
+// Einmalig: Nav, Listener, Formulare (NICHT bei jedem Re-Render!)
+function initOnce() {
   buildNav();
   initMobile();
   initBackup();
   initTeamSwitch();
   initSimpleTabs();
-  // Termine
-  renderTermine(); renderCalendar(); initTermineForm(); updateNextEvent();
+  initTermineForm();
   const lbl = document.getElementById('cal-month-label');
   if (lbl) lbl.textContent = new Date().toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
-  // Training / Cups
-  renderTraining(); initTrainingForm();
-  renderCups(); initCupsForm();
-  // Roster
-  renderRoster();
+  initTrainingForm();
+  initCupsForm();
   const reb = document.getElementById('roster-edit-btn');
   if (reb) reb.addEventListener('click', toggleRosterEdit);
-  // Planer
-  renderTasks(); initTaskForm(); renderAvail();
-  // Lineups / Demos / Scouting / Notes
-  renderLineups(); initLineupForm();
-  renderDemos(); initDemoForm();
-  renderScout(); initScoutForm();
-  renderNotes(); initNoteForm();
+  initTaskForm();
+  initLineupForm();
+  initDemoForm();
+  initScoutForm();
+  initNoteForm();
+}
+// Bei jedem Datenstand neu zeichnen (lokal & nach Cloud-Update)
+function renderAll() {
+  renderTermine(); renderCalendar(); updateNextEvent();
+  renderTraining();
+  renderCups();
+  renderRoster();
+  renderTasks(); renderAvail();
+  renderLineups();
+  renderDemos();
+  renderScout();
+  renderNotes();
+  // Stratbook (eigenes Inline-Script) mitziehen, falls vorhanden
+  try { if (typeof renderStrats === 'function') renderStrats(); } catch (e) {}
+  try { if (typeof renderDrawings === 'function') renderDrawings(); } catch (e) {}
+  try { if (window.mapCanvas && mapCanvas.load) { mapCanvas.load(); mapCanvas.draw(); } } catch (e) {}
+}
+window.renderAll = renderAll;
+
+document.addEventListener('DOMContentLoaded', () => {
+  initOnce();
+  renderAll(); // sofortiger Erst-Render aus lokalem Cache
+  // Cloud-Sync übernimmt ab jetzt (falls konfiguriert) — siehe cloud.js
+  if (window.PortalCloud && typeof PortalCloud.boot === 'function') {
+    PortalCloud.boot();
+  }
 });
