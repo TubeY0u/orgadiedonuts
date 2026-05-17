@@ -8,5 +8,5 @@
    Solange hier die Platzhalter stehen, läuft das Portal im
    Lokal-Modus (nur dieser Browser, kein Live-Sync).
    ═══════════════════════════════════════════════════════════════ */
-window.SUPABASE_URL      = "DEIN_PROJEKT_URL_HIER";   // z.B. https://abcdxyz.supabase.co
-window.SUPABASE_ANON_KEY = "DEIN_ANON_KEY_HIER";
+window.SUPABASE_URL      = "https://phyvbcapszuhpyiqpojs.supabase.co";
+window.SUPABASE_ANON_KEY = "sb_publishable_C2cbt1pyhZS_NjiLlWCiVg_fo2B1kcY";
