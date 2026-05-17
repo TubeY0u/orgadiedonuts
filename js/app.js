@@ -299,6 +299,29 @@ function initSimpleTabs() {
 }
 
 /* ─── TERMINE ─────────────────────────────────────────────── */
+// Kalender-Ansicht (pro Team / Orga-Gesamt). Reine UI-Präferenz pro
+// Browser → bewusst OHNE dnd_-Prefix (wird nicht gesynct/exportiert).
+function getCalView() { try { return localStorage.getItem('cal_view') || 'ALL'; } catch { return 'ALL'; } }
+function setCalView(v) { try { localStorage.setItem('cal_view', v); } catch (e) {} }
+function eventInView(t) {
+  const v = getCalView();
+  if (v === 'ALL') return true;
+  const team = t.team || 'Alle';
+  return team === v || team === 'Alle'; // Team-Termine + Orga-weite ("Alle")
+}
+function initCalSwitch() {
+  const box = document.getElementById('cal-switch'); if (!box) return;
+  const cur = getCalView();
+  box.querySelectorAll('.cal-sw-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.calview === cur);
+    b.addEventListener('click', () => {
+      setCalView(b.dataset.calview);
+      box.querySelectorAll('.cal-sw-btn').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      renderTermine(); renderCalendar();
+    });
+  });
+}
 function deleteTermin(id) {
   if (!confirm('Termin löschen?')) return;
   Store.set('termine', Store.get('termine').filter(t => t.id !== id));
@@ -306,7 +329,7 @@ function deleteTermin(id) {
 }
 function renderTermine() {
   const c = document.getElementById('termine-list'); if (!c) return;
-  const list = Store.get('termine').sort((a, b) => new Date(a.date) - new Date(b.date));
+  const list = Store.get('termine').filter(eventInView).sort((a, b) => new Date(a.date) - new Date(b.date));
   const today = new Date(new Date().toDateString());
   const up = list.filter(t => new Date(t.date) >= today);
   const past = list.filter(t => new Date(t.date) < today);
@@ -333,7 +356,7 @@ function renderCalendar() {
   const offset = (new Date(y, mo, 1).getDay() + 6) % 7;
   const dim = new Date(y, mo + 1, 0).getDate();
   const byDay = {};
-  Store.get('termine').forEach(t => {
+  Store.get('termine').filter(eventInView).forEach(t => {
     const d = new Date(t.date);
     if (d.getFullYear() === y && d.getMonth() === mo) { const k = d.getDate(); (byDay[k] = byDay[k] || []).push(t); }
   });
@@ -783,6 +806,7 @@ function initOnce() {
   initBackup();
   initTeamSwitch();
   initSimpleTabs();
+  initCalSwitch();
   initTermineForm();
   const lbl = document.getElementById('cal-month-label');
   if (lbl) lbl.textContent = new Date().toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
