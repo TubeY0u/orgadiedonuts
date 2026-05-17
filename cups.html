@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ergebnisse · DieDonuts Esports</title>
+<link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <img src="https://donuts-esports.de/assets/logo_trans.png" alt="DieDonuts">
+    <span class="intern-tag">Intern</span>
+  </div>
+  <nav class="nav" id="sidebar-nav"></nav>
+  <div class="sidebar-user">
+    <div class="user-av">L</div>
+    <div>
+      <div class="user-name">Lukas</div>
+      <div class="user-role">Owner · Pressesprecher</div>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Ergebnisse</div>
+      <div class="page-sub">Alle Matches · DachCS · ESEA · Scrims · Cups</div>
+    </div>
+  </div>
+
+  <!-- Bilanz-Strip -->
+  <div class="g4" style="margin-bottom:20px;">
+    <div class="tile">
+      <div class="tile-val" id="stat-total">0</div>
+      <div class="tile-label">Matches gesamt</div>
+    </div>
+    <div class="tile" style="border-top-color:var(--green);">
+      <div class="tile-val" id="stat-w" style="color:var(--green);">0</div>
+      <div class="tile-label">Siege</div>
+    </div>
+    <div class="tile" style="border-top-color:var(--red);">
+      <div class="tile-val" id="stat-l" style="color:var(--red);">0</div>
+      <div class="tile-label">Niederlagen</div>
+    </div>
+    <div class="tile" style="border-top-color:var(--muted);">
+      <div class="tile-val" id="stat-d" style="color:var(--muted2);">0</div>
+      <div class="tile-label">Unentschieden</div>
+    </div>
+  </div>
+
+  <!-- Formular -->
+  <div class="form-box">
+    <div class="form-box-title">+ Ergebnis eintragen</div>
+    <form id="cups-form">
+      <div class="form-grid">
+        <div class="fg">
+          <label>Gegner *</label>
+          <input name="gegner" required placeholder="Teamname des Gegners">
+        </div>
+        <div class="fg">
+          <label>Ergebnis *</label>
+          <select name="ergebnis" required>
+            <option value="W">Sieg (W)</option>
+            <option value="L">Niederlage (L)</option>
+            <option value="D">Unentschieden (D)</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Score</label>
+          <input name="score" placeholder="z.B. 2:1 · 16:14 · 2:0">
+        </div>
+        <div class="fg">
+          <label>Liga / Format *</label>
+          <select name="liga" required>
+            <option value="DachCS">DachCS</option>
+            <option value="ESEA">ESEA</option>
+            <option value="Scrim">Scrim</option>
+            <option value="Cup">Cup</option>
+            <option value="Sonstiges">Sonstiges</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Team</label>
+          <select name="team">
+            <option value="Main">Donuts Main</option>
+            <option value="Nxt">Donuts Nxt</option>
+            <option value="DNS">Donuts DNS</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Datum *</label>
+          <input name="date" type="date" required>
+        </div>
+        <div class="fg">
+          <label>Maps</label>
+          <input name="maps" placeholder="z.B. Mirage, Inferno, Ancient">
+        </div>
+        <div class="fg">
+          <label>Notizen</label>
+          <input name="notes" placeholder="FACEIT-Link, Highlight, Anmerkungen...">
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary">Ergebnis speichern</button>
+    </form>
+  </div>
+
+  <!-- Liste -->
+  <div class="card">
+    <div class="card-title">Alle Ergebnisse</div>
+    <div id="cups-list"></div>
+  </div>
+
+</main>
+<script src="js/app.js"></script>
+</body>
+</html>

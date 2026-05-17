@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kalender · DieDonuts Esports</title>
+<link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <img src="https://donuts-esports.de/assets/logo_trans.png" alt="DieDonuts">
+    <span class="intern-tag">Intern</span>
+  </div>
+  <nav class="nav" id="sidebar-nav"></nav>
+  <div class="sidebar-user">
+    <div class="user-av">L</div>
+    <div>
+      <div class="user-name">Lukas</div>
+      <div class="user-role">Owner · Pressesprecher</div>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Kalender & Termine</div>
+      <div class="page-sub">Alle Events · Training · Ligen · Scrims · Meetings</div>
+    </div>
+  </div>
+
+  <!-- Formular -->
+  <div class="form-box">
+    <div class="form-box-title">+ Neuen Termin eintragen</div>
+    <form id="termin-form">
+      <div class="form-grid">
+        <div class="fg">
+          <label>Titel *</label>
+          <input name="title" required placeholder="z.B. Training · DachCS S5 · Scrim vs. ...">
+        </div>
+        <div class="fg">
+          <label>Typ *</label>
+          <select name="type" required>
+            <option value="Training">Training</option>
+            <option value="DachCS">DachCS</option>
+            <option value="ESEA">ESEA</option>
+            <option value="Scrimmage">Scrimmage</option>
+            <option value="Meeting">Meeting</option>
+            <option value="Sonstiges">Sonstiges</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Datum *</label>
+          <input name="date" type="date" required>
+        </div>
+        <div class="fg">
+          <label>Uhrzeit</label>
+          <input name="time" type="time">
+        </div>
+        <div class="fg">
+          <label>Team</label>
+          <select name="team">
+            <option value="Alle">Alle Teams</option>
+            <option value="Main">Donuts Main</option>
+            <option value="Nxt">Donuts Nxt</option>
+            <option value="DNS">Donuts DNS</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Notizen</label>
+          <input name="notes" placeholder="FACEIT-Link, Server-IP, Hinweise...">
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary">Termin speichern</button>
+    </form>
+  </div>
+
+  <div class="g2" style="gap:20px;">
+    <!-- Kalender -->
+    <div class="card" style="margin-bottom:0;">
+      <div class="card-title" id="cal-month-label">Kalender</div>
+      <div class="cal-grid" id="cal-grid"></div>
+      <!-- Legende -->
+      <div style="display:flex;gap:14px;margin-top:12px;flex-wrap:wrap;">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:9px;display:flex;align-items:center;gap:4px;color:var(--muted);"><span style="width:8px;height:8px;background:var(--red);border-radius:1px;display:inline-block;"></span>Training</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:9px;display:flex;align-items:center;gap:4px;color:var(--muted);"><span style="width:8px;height:8px;background:var(--yellow);border-radius:1px;display:inline-block;"></span>Liga</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:9px;display:flex;align-items:center;gap:4px;color:var(--muted);"><span style="width:8px;height:8px;background:var(--blue);border-radius:1px;display:inline-block;"></span>Meeting</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:9px;display:flex;align-items:center;gap:4px;color:var(--muted);"><span style="width:8px;height:8px;background:var(--green);border-radius:1px;display:inline-block;"></span>Scrim</span>
+      </div>
+    </div>
+
+    <!-- Terminliste -->
+    <div class="card" style="margin-bottom:0;overflow-y:auto;max-height:500px;">
+      <div class="card-title">Alle Termine</div>
+      <div id="termine-list"></div>
+    </div>
+  </div>
+
+</main>
+<script src="js/app.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const now = new Date();
+    const label = document.getElementById('cal-month-label');
+    if (label) label.textContent = now.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
+  });
+</script>
+</body>
+</html>

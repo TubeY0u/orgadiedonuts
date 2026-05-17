@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Training · DieDonuts Esports</title>
+<link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <img src="https://donuts-esports.de/assets/logo_trans.png" alt="DieDonuts">
+    <span class="intern-tag">Intern</span>
+  </div>
+  <nav class="nav" id="sidebar-nav"></nav>
+  <div class="sidebar-user">
+    <div class="user-av">L</div>
+    <div>
+      <div class="user-name">Lukas</div>
+      <div class="user-role">Owner · Pressesprecher</div>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Training</div>
+      <div class="page-sub">Ideen · Fokuspunkte · Übungen für alle Teams</div>
+    </div>
+  </div>
+
+  <!-- Formular -->
+  <div class="form-box">
+    <div class="form-box-title">+ Neue Trainingsidee eintragen</div>
+    <form id="training-form">
+      <div class="form-grid">
+        <div class="fg">
+          <label>Titel *</label>
+          <input name="title" required placeholder="z.B. B-Site Executes · Pistolround CT · Nades Mirage">
+        </div>
+        <div class="fg">
+          <label>Kategorie *</label>
+          <select name="cat" required>
+            <option value="Aim">Aim</option>
+            <option value="Utility">Utility</option>
+            <option value="Strategie">Strategie</option>
+            <option value="Demo">Demo Review</option>
+            <option value="Kommunikation">Kommunikation</option>
+            <option value="Sonstiges">Sonstiges</option>
+          </select>
+        </div>
+        <div class="fg" style="grid-column:1/-1;">
+          <label>Beschreibung</label>
+          <textarea name="desc" placeholder="Was soll geübt werden? Kontext, Ziel, Ablauf..."></textarea>
+        </div>
+        <div class="fg">
+          <label>Dauer (Minuten)</label>
+          <input name="dauer" type="number" min="5" step="5" placeholder="z.B. 30">
+        </div>
+        <div class="fg">
+          <label>Eingetragen von</label>
+          <input name="von" placeholder="Dein IGN">
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary">Idee speichern</button>
+    </form>
+  </div>
+
+  <!-- Liste -->
+  <div class="card">
+    <div class="card-title">Alle Trainingsideen</div>
+    <div id="training-list"></div>
+  </div>
+
+</main>
+<script src="js/app.js"></script>
+</body>
+</html>

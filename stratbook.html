@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Stratbook · DieDonuts Esports</title>
+<link rel="stylesheet" href="css/main.css">
+<style>
+.filter-select{background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:2px;padding:6px 10px;font-size:12px;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.5px;outline:none;cursor:pointer;}
+.filter-select:focus{border-color:var(--red);}
+/* Tool buttons – eigene Farben pro Typ */
+.tool-btn[data-tool="ct"].active    {background:#38bdf8;color:#000;}
+.tool-btn[data-tool="t"].active     {background:#e11d48;color:#fff;}
+.tool-btn[data-tool="smoke"].active {background:#64748b;color:#fff;}
+.tool-btn[data-tool="molotov"].active{background:#f97316;color:#000;}
+.tool-btn[data-tool="flash"].active {background:#fde68a;color:#000;}
+.tool-btn[data-tool="he"].active    {background:#84cc16;color:#000;}
+.tool-btn[data-tool="pfeil"].active {background:#c084fc;color:#000;}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <img src="https://donuts-esports.de/assets/logo_trans.png" alt="DieDonuts">
+    <span class="intern-tag">Intern</span>
+  </div>
+  <nav class="nav" id="sidebar-nav"></nav>
+  <div class="sidebar-user">
+    <div class="user-av">L</div>
+    <div>
+      <div class="user-name">Lukas (TubeYou)</div>
+      <div class="user-role">Owner · Pressesprecher</div>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Stratbook</div>
+      <div class="page-sub">Strats · Rollen · Kartenansicht · Nades</div>
+    </div>
+  </div>
+
+  <div class="strat-tabs">
+    <button class="strat-tab active" data-panel="panel-strats">📋 Strats</button>
+    <button class="strat-tab" data-panel="panel-karte">🗺 Kartenansicht</button>
+  </div>
+
+  <!-- ══ STRATS ══ -->
+  <div class="strat-panel active" id="panel-strats">
+    <div class="form-box">
+      <div class="form-box-title">+ Neue Strat eintragen</div>
+      <form id="strat-form">
+        <div class="form-grid">
+          <div class="fg"><label>Name *</label><input name="name" required placeholder="z.B. A-Split, B-Rush, Fake-A Mid"></div>
+          <div class="fg"><label>Karte *</label>
+            <select name="karte" required>
+              <option>Mirage</option><option>Inferno</option><option>Ancient</option>
+              <option>Anubis</option><option>Dust2</option><option>Nuke</option>
+              <option>Overpass</option><option>Vertigo</option>
+            </select>
+          </div>
+          <div class="fg"><label>Seite</label>
+            <select name="seite"><option value="T">T-Side</option><option value="CT">CT-Side</option><option value="Beide">Beide</option></select>
+          </div>
+          <div class="fg"><label>Kurzbeschreibung</label><input name="kurz" placeholder="z.B. Standard A-Exec mit Mid-Poke"></div>
+        </div>
+        <div style="margin:14px 0 10px;">
+          <div class="card-title" style="margin-bottom:10px;">Spielerrollen</div>
+          <div id="rollen-container"></div>
+          <button type="button" class="btn btn-ghost btn-sm" id="add-rolle-btn" style="margin-top:8px;">+ Spieler hinzufügen</button>
+        </div>
+        <div class="fg" style="margin-top:6px;"><label>Notizen / Timings / Calls</label><textarea name="notizen" placeholder="Calls, Timings, Absprachen..."></textarea></div>
+        <div style="display:flex;gap:10px;margin-top:6px;">
+          <button type="submit" class="btn btn-primary">Strat speichern</button>
+          <button type="button" class="btn btn-ghost" id="reset-form-btn">Leeren</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+        <div class="card-title" style="margin-bottom:0;">Alle Strats</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <select id="filter-karte" class="filter-select"><option value="">Alle Karten</option><option>Mirage</option><option>Inferno</option><option>Ancient</option><option>Anubis</option><option>Dust2</option><option>Nuke</option><option>Overpass</option><option>Vertigo</option></select>
+          <select id="filter-seite" class="filter-select"><option value="">T + CT</option><option value="T">T-Side</option><option value="CT">CT-Side</option></select>
+        </div>
+      </div>
+      <div id="strat-list"></div>
+    </div>
+  </div>
+
+  <!-- ══ KARTE ══ -->
+  <div class="strat-panel" id="panel-karte">
+    <div class="form-box" style="padding:14px 16px;">
+      <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;">
+        <div class="fg" style="margin:0;"><label>Karte</label>
+          <select id="map-select" style="width:140px;">
+            <option>Mirage</option><option>Inferno</option><option>Ancient</option>
+            <option>Anubis</option><option>Dust2</option><option>Nuke</option>
+            <option>Overpass</option><option>Vertigo</option>
+          </select>
+        </div>
+        <div class="fg" style="margin:0;flex:1;min-width:160px;"><label>Name der Zeichnung</label><input id="drawing-name" placeholder="z.B. A-Default Smokes"></div>
+        <button class="btn btn-ghost btn-sm" id="save-drawing-btn">💾 Speichern</button>
+        <button class="btn btn-danger btn-sm" id="clear-btn">🗑 Zurücksetzen</button>
+      </div>
+    </div>
+
+    <!-- Tools -->
+    <div class="map-controls" style="margin-bottom:10px;">
+      <span style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-right:4px;">Spieler</span>
+      <button class="tool-btn active" data-tool="ct" style="border-color:#38bdf8;">🔵 CT</button>
+      <button class="tool-btn" data-tool="t" style="border-color:#e11d48;">🔴 T</button>
+      <span style="width:1px;background:var(--border);height:24px;align-self:center;margin:0 4px;display:inline-block;"></span>
+      <span style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-right:4px;">Nades</span>
+      <button class="tool-btn" data-tool="smoke">💨 Smoke</button>
+      <button class="tool-btn" data-tool="molotov">🔥 Moly</button>
+      <button class="tool-btn" data-tool="flash">⚡ Flash</button>
+      <button class="tool-btn" data-tool="he">💥 HE</button>
+      <button class="tool-btn" data-tool="pfeil">↗ Pfeil</button>
+    </div>
+    <!-- Zoom + Größe -->
+    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:10px;">
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);">Zoom</span>
+        <input type="range" id="map-zoom" min="30" max="100" value="100" style="width:90px;accent-color:var(--red);cursor:pointer;">
+        <span id="map-zoom-val" style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted2);min-width:32px;">100%</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <span style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);">Marker</span>
+        <input type="range" id="marker-size" min="30" max="180" value="100" style="width:90px;accent-color:var(--red);cursor:pointer;">
+        <span id="marker-size-val" style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted2);min-width:32px;">100%</span>
+      </div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);flex:1;" id="map-hint">Klick = setzen · nochmal = löschen</div>
+    </div>
+
+    <div style="display:flex;justify-content:center;">
+      <div class="map-wrap" id="map-wrap" style="width:100%;max-width:100%;"><canvas id="map-canvas"></canvas></div>
+    </div>
+
+    <div class="map-legend" style="margin-top:12px;">
+      <div class="legend-item"><div class="legend-dot" style="background:#38bdf8;"></div>CT</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#e11d48;"></div>T</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#64748b;border-radius:50%;"></div>Smoke</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#f97316;border-radius:2px;clip-path:polygon(50% 0%,65% 35%,100% 40%,75% 65%,80% 100%,50% 80%,20% 100%,25% 65%,0% 40%,35% 35%);"></div>Flash</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#f97316;border-radius:0 50% 50% 50%;transform:rotate(-45deg);"></div>Moly</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#84cc16;"></div>HE</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#c084fc;border-radius:2px;"></div>Pfeil</div>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <div class="card-title">Gespeicherte Zeichnungen</div>
+      <div id="drawings-list"></div>
+    </div>
+  </div>
+</main>
+
+<script src="js/app.js"></script>
+<script>
+// ═══════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════
+var karteInited = false;
+document.querySelectorAll('.strat-tab').forEach(function(tab){
+  tab.addEventListener('click', function(){
+    document.querySelectorAll('.strat-tab').forEach(function(t){ t.classList.remove('active'); });
+    document.querySelectorAll('.strat-panel').forEach(function(p){ p.classList.remove('active'); });
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.panel).classList.add('active');
+    if (tab.dataset.panel === 'panel-karte') {
+      if (!karteInited) {
+        karteInited = true;
+        // double-rAF: erstes Frame = Panel wird sichtbar, zweites = Layout berechnet
+        requestAnimationFrame(function(){
+          requestAnimationFrame(function(){ initCanvas(); });
+        });
+      } else if (mapCanvas) {
+        requestAnimationFrame(function(){
+          requestAnimationFrame(function(){ mapCanvas.resize(); });
+        });
+      }
+    }
+  });
+});
+
+// ═══════════════════════════════════════════
+// STRATS
+// ═══════════════════════════════════════════
+var STRAT_KEY = 'dnd_strats';
+function getStrats(){ try{ return JSON.parse(localStorage.getItem(STRAT_KEY))||[]; }catch{ return []; } }
+function saveStrats(l){ localStorage.setItem(STRAT_KEY, JSON.stringify(l)); }
+
+function addRolleRow(name, aufgabe){
+  var rc = document.getElementById('rollen-container');
+  var row = document.createElement('div');
+  row.style.cssText = 'display:grid;grid-template-columns:140px 1fr auto;gap:8px;margin-bottom:6px;align-items:center;';
+  row.innerHTML = '<input name="rn" value="'+(name||'')+'" placeholder="Spieler / Rolle" style="font-family:\'Barlow Condensed\',sans-serif;font-weight:700;text-transform:uppercase;">'+
+    '<input name="ra" value="'+(aufgabe||'')+'" placeholder="Aufgabe, Position, Timing...">'+
+    '<button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove()">✕</button>';
+  rc.appendChild(row);
+}
+function resetRollen(){
+  document.getElementById('rollen-container').innerHTML = '';
+  ['hALFY','chrizzW','TubeYou','Spieler 4','Spieler 5'].forEach(function(n){ addRolleRow(n,''); });
+}
+resetRollen();
+document.getElementById('add-rolle-btn').addEventListener('click', function(){ addRolleRow('',''); });
+document.getElementById('reset-form-btn').addEventListener('click', function(){ document.getElementById('strat-form').reset(); resetRollen(); });
+
+document.getElementById('strat-form').addEventListener('submit', function(e){
+  e.preventDefault();
+  var form = e.target;
+  var rollen = [];
+  form.querySelectorAll('#rollen-container > div').forEach(function(row){
+    var n=row.querySelector('[name=rn]'), a=row.querySelector('[name=ra]');
+    if(n&&n.value.trim()) rollen.push({name:n.value.trim(), aufgabe:a?a.value.trim():''});
+  });
+  var list = getStrats();
+  list.push({ id:Date.now().toString(), name:form.querySelector('[name=name]').value.trim(),
+    karte:form.querySelector('[name=karte]').value, seite:form.querySelector('[name=seite]').value,
+    kurz:form.querySelector('[name=kurz]').value.trim(), rollen:rollen,
+    notizen:form.querySelector('[name=notizen]').value.trim() });
+  saveStrats(list);
+  document.getElementById('reset-form-btn').click();
+  renderStrats();
+  var btn=form.querySelector('[type=submit]'), orig=btn.textContent;
+  btn.textContent='✓ Gespeichert'; btn.style.cssText='background:var(--green)!important;color:#000!important;';
+  setTimeout(function(){ btn.textContent=orig; btn.style.cssText=''; }, 1800);
+});
+
+function deleteStrat(id){ if(!confirm('Strat löschen?')) return; saveStrats(getStrats().filter(function(s){ return s.id!==id; })); renderStrats(); }
+
+var KC={ Mirage:'#f59e0b',Inferno:'#ef4444',Ancient:'#10b981',Anubis:'#8b5cf6',Dust2:'#f97316',Nuke:'#22c55e',Overpass:'#38bdf8',Vertigo:'#ec4899' };
+var SB={ T:'b-red',CT:'b-blue',Beide:'b-muted' };
+
+function renderStrats(){
+  var c=document.getElementById('strat-list'); if(!c) return;
+  var fk=document.getElementById('filter-karte').value, fs=document.getElementById('filter-seite').value;
+  var list=getStrats();
+  if(fk) list=list.filter(function(s){ return s.karte===fk; });
+  if(fs) list=list.filter(function(s){ return s.seite===fs||s.seite==='Beide'; });
+  if(!list.length){ c.innerHTML='<div class="empty-hint">Noch keine Strats eingetragen.</div>'; return; }
+  c.innerHTML=list.map(function(s){
+    var rHtml=(s.rollen&&s.rollen.length)?'<div style="margin-bottom:12px;"><div class="card-title" style="margin-bottom:8px;">Rollen</div>'+
+      s.rollen.map(function(r){ return '<div class="role-row"><span class="role-name">'+r.name+'</span><span class="role-task">'+(r.aufgabe||'—')+'</span></div>'; }).join('')+'</div>':'';
+    var nHtml=s.notizen?'<div><div class="card-title" style="margin-bottom:6px;">Notizen</div><div style="font-size:13px;color:var(--muted2);line-height:1.6;white-space:pre-wrap;">'+s.notizen+'</div></div>':'';
+    return '<div class="strat-card" id="sc-'+s.id+'" onclick="toggleStrat(\''+s.id+'\')">' +
+      '<div class="strat-card-header"><span style="width:10px;height:10px;border-radius:50%;background:'+(KC[s.karte]||'var(--muted)')+';flex-shrink:0;display:inline-block;"></span>' +
+      '<span class="strat-card-name">'+s.name+'</span><span class="badge b-muted" style="font-size:9px;">'+s.karte+'</span>' +
+      '<span class="badge '+(SB[s.seite]||'b-muted')+'" style="font-size:9px;">'+s.seite+'</span>' +
+      '<span class="strat-arrow" style="color:var(--muted);font-size:16px;margin-left:4px;transition:transform 0.2s;">▾</span>' +
+      '<button class="btn btn-danger btn-sm" style="margin-left:4px;" onclick="event.stopPropagation();deleteStrat(\''+s.id+'\')">✕</button></div>' +
+      (s.kurz?'<div style="font-size:12px;color:var(--muted2);margin-top:6px;padding-left:18px;">'+s.kurz+'</div>':'')+
+      '<div class="strat-body">'+rHtml+nHtml+
+      '<div style="margin-top:12px;"><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();goToMap(\''+s.karte+'\',\''+s.name+'\')">🗺 Auf Karte zeigen</button></div></div></div>';
+  }).join('');
+}
+function toggleStrat(id){
+  var card=document.getElementById('sc-'+id); if(!card) return;
+  card.classList.toggle('expanded');
+  var a=card.querySelector('.strat-arrow'); if(a) a.style.transform=card.classList.contains('expanded')?'rotate(180deg)':'';
+}
+function goToMap(karte,name){
+  document.querySelectorAll('.strat-tab').forEach(function(t){ t.classList.remove('active'); });
+  document.querySelectorAll('.strat-panel').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelector('[data-panel="panel-karte"]').classList.add('active');
+  document.getElementById('panel-karte').classList.add('active');
+  document.getElementById('map-select').value = karte;
+  document.getElementById('drawing-name').value = name;
+  if(!karteInited){
+    karteInited=true;
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){ initCanvas(); if(mapCanvas) mapCanvas.setMap(karte); }); });
+  } else if(mapCanvas){
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){ mapCanvas.setMap(karte); }); });
+  }
+}
+document.getElementById('filter-karte').addEventListener('change', renderStrats);
+document.getElementById('filter-seite').addEventListener('change', renderStrats);
+
+// ═══════════════════════════════════════════
+// MAP CANVAS
+// ═══════════════════════════════════════════
+var mapCanvas = null;
+
+// CS2-Kartenbilder: lokale Pfade (maps/ Ordner), URL als Fallback
+// Leg eigene Bilder unter G:\DIEDonutsOrga\maps\mirage.jpg usw. ab!
+var MAP_IMAGES = {
+  'Mirage':   ['maps/mirage.jpg',   'https://cdn.csgostats.gg/map-images/de_mirage.jpg',   'https://totalcsgo.com/images/maps/de_mirage.jpg'],
+  'Inferno':  ['maps/inferno.jpg',  'https://cdn.csgostats.gg/map-images/de_inferno.jpg',  'https://totalcsgo.com/images/maps/de_inferno.jpg'],
+  'Ancient':  ['maps/ancient.jpg',  'https://cdn.csgostats.gg/map-images/de_ancient.jpg',  'https://totalcsgo.com/images/maps/de_ancient.jpg'],
+  'Anubis':   ['maps/anubis.jpg',   'https://cdn.csgostats.gg/map-images/de_anubis.jpg',   'https://totalcsgo.com/images/maps/de_anubis.jpg'],
+  'Dust2':    ['maps/dust2.jpg',    'https://cdn.csgostats.gg/map-images/de_dust2.jpg',    'https://totalcsgo.com/images/maps/de_dust2.jpg'],
+  'Nuke':     ['maps/nuke.jpg',     'https://cdn.csgostats.gg/map-images/de_nuke.jpg',     'https://totalcsgo.com/images/maps/de_nuke.jpg'],
+  'Overpass': ['maps/overpass.jpg', 'https://cdn.csgostats.gg/map-images/de_overpass.jpg', 'https://totalcsgo.com/images/maps/de_overpass.jpg'],
+  'Vertigo':  ['maps/vertigo.jpg',  'https://cdn.csgostats.gg/map-images/de_vertigo.jpg',  'https://totalcsgo.com/images/maps/de_vertigo.jpg'],
+};
+
+// Grundgerüst: 5 CT (oben verteilt) + 5 T (unten verteilt)
+var GRUNDGERUEST_CT = [
+  {x:0.22,y:0.18},{x:0.40,y:0.13},{x:0.58,y:0.18},{x:0.73,y:0.30},{x:0.78,y:0.50}
+];
+var GRUNDGERUEST_T = [
+  {x:0.18,y:0.78},{x:0.33,y:0.83},{x:0.50,y:0.86},{x:0.65,y:0.80},{x:0.80,y:0.72}
+];
+
+function makeGrundgeruest(){
+  var markers = [];
+  GRUNDGERUEST_CT.forEach(function(p,i){ markers.push({x:p.x,y:p.y,type:'ct',label:'CT'+(i+1)}); });
+  GRUNDGERUEST_T.forEach(function(p,i){  markers.push({x:p.x,y:p.y,type:'t', label:'T'+(i+1)}); });
+  return markers;
+}
+
+// ── Draw-Helfer ──────────────────────────────
+function drawCT(ctx, x, y, r, label){
+  ctx.save();
+  // Outer ring
+  ctx.beginPath(); ctx.arc(x,y,r+3,0,Math.PI*2);
+  ctx.strokeStyle='rgba(56,189,248,0.3)'; ctx.lineWidth=4; ctx.stroke();
+  // Fill
+  ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
+  ctx.fillStyle='rgba(56,189,248,0.22)'; ctx.fill();
+  ctx.strokeStyle='#38bdf8'; ctx.lineWidth=2; ctx.stroke();
+  ctx.font='700 '+Math.round(r*0.95)+'px JetBrains Mono,monospace';
+  ctx.fillStyle='#38bdf8'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(label,x,y);
+  ctx.restore();
+}
+function drawT(ctx, x, y, r, label){
+  ctx.save();
+  ctx.beginPath(); ctx.arc(x,y,r+3,0,Math.PI*2);
+  ctx.strokeStyle='rgba(225,29,72,0.3)'; ctx.lineWidth=4; ctx.stroke();
+  ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
+  ctx.fillStyle='rgba(225,29,72,0.22)'; ctx.fill();
+  ctx.strokeStyle='#e11d48'; ctx.lineWidth=2; ctx.stroke();
+  ctx.font='700 '+Math.round(r*0.9)+'px JetBrains Mono,monospace';
+  ctx.fillStyle='#e11d48'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(label,x,y);
+  ctx.restore();
+}
+function drawSmoke(ctx, x, y, r){
+  var R = r * 1.35;
+  ctx.save();
+  // Main cloud body
+  ctx.globalAlpha = 0.55;
+  ctx.fillStyle = '#64748b';
+  ctx.beginPath(); ctx.arc(x,y,R,0,Math.PI*2); ctx.fill();
+  // Cloud bumps
+  ctx.globalAlpha = 0.4;
+  ctx.fillStyle = '#94a3b8';
+  ctx.beginPath(); ctx.arc(x-R*0.38,y-R*0.25,R*0.55,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(x+R*0.32,y-R*0.22,R*0.48,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(x+R*0.1,y-R*0.38,R*0.42,0,Math.PI*2); ctx.fill();
+  ctx.globalAlpha = 1;
+  // Label
+  ctx.font='700 '+Math.round(r*0.9)+'px JetBrains Mono,monospace';
+  ctx.fillStyle='#e2e8f0'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('S',x,y+R*0.05);
+  ctx.restore();
+}
+function drawMolotov(ctx, x, y, r){
+  ctx.save();
+  var h = r * 1.9;
+  // Outer flame
+  ctx.beginPath();
+  ctx.moveTo(x, y-h*0.75);
+  ctx.bezierCurveTo(x+r*1.1, y-h*0.4, x+r*1.2, y+h*0.05, x, y+h*0.18);
+  ctx.bezierCurveTo(x-r*1.2, y+h*0.05, x-r*1.1, y-h*0.4, x, y-h*0.75);
+  ctx.fillStyle='#f97316'; ctx.globalAlpha=0.9; ctx.fill();
+  // Inner flame
+  ctx.beginPath();
+  ctx.moveTo(x, y-h*0.45);
+  ctx.bezierCurveTo(x+r*0.5, y-h*0.15, x+r*0.55, y+h*0.04, x, y+h*0.04);
+  ctx.bezierCurveTo(x-r*0.55, y+h*0.04, x-r*0.5, y-h*0.15, x, y-h*0.45);
+  ctx.fillStyle='#fde68a'; ctx.globalAlpha=0.95; ctx.fill();
+  ctx.globalAlpha=1;
+  ctx.font='700 '+Math.round(r*0.8)+'px JetBrains Mono,monospace';
+  ctx.fillStyle='#7c2d12'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('M',x,y-r*0.05);
+  ctx.restore();
+}
+function drawFlash(ctx, x, y, r){
+  ctx.save();
+  var spikes=8, outer=r*1.45, inner=r*0.65;
+  ctx.beginPath();
+  for(var i=0;i<spikes*2;i++){
+    var angle=(i*Math.PI/spikes)-Math.PI/2;
+    var rad=i%2===0?outer:inner;
+    if(i===0) ctx.moveTo(x+rad*Math.cos(angle),y+rad*Math.sin(angle));
+    else ctx.lineTo(x+rad*Math.cos(angle),y+rad*Math.sin(angle));
+  }
+  ctx.closePath();
+  ctx.fillStyle='#fde68a'; ctx.globalAlpha=0.92; ctx.fill();
+  ctx.globalAlpha=1;
+  ctx.font='700 '+Math.round(r*0.8)+'px JetBrains Mono,monospace';
+  ctx.fillStyle='#713f12'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('F',x,y);
+  ctx.restore();
+}
+function drawHE(ctx, x, y, r){
+  ctx.save();
+  ctx.beginPath(); ctx.arc(x,y,r+3,0,Math.PI*2);
+  ctx.strokeStyle='rgba(132,204,22,0.3)'; ctx.lineWidth=4; ctx.stroke();
+  ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
+  ctx.fillStyle='rgba(132,204,22,0.22)'; ctx.fill();
+  ctx.strokeStyle='#84cc16'; ctx.lineWidth=2; ctx.stroke();
+  ctx.font='700 '+Math.round(r*0.95)+'px JetBrains Mono,monospace';
+  ctx.fillStyle='#84cc16'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('H',x,y);
+  ctx.restore();
+}
+
+// ── Schematic-Zonen-Daten ───────────────────
+// Jede Zone: [x, y, w, h, label, colorKey]
+// x/y/w/h als Anteil 0-1 der Canvas-Größe
+// colorKey: 'a'=blau, 'b'=orange, 't'=rot, 'ct'=cyan, 'mid'=grau, 'other'=lila
+var MAP_ZONES = {
+  Mirage: {
+    zones:[
+      [0.04,0.04,0.30,0.26,'A SITE','a'],
+      [0.60,0.30,0.36,0.26,'B SITE','b'],
+      [0.30,0.36,0.30,0.22,'MID','mid'],
+      [0.34,0.76,0.28,0.18,'T-SPAWN','t'],
+      [0.64,0.04,0.32,0.20,'CT-SPAWN','ct'],
+      [0.04,0.32,0.18,0.28,'CT-LONG','other'],
+      [0.30,0.04,0.28,0.18,'SHORT','other'],
+      [0.60,0.60,0.36,0.20,'B-APPS','other'],
+    ],
+    lines:[[0.48,0.94,0.48,0.58],[0.48,0.58,0.19,0.30],[0.48,0.58,0.60,0.43],[0.30,0.17,0.62,0.17]]
+  },
+  Inferno: {
+    zones:[
+      [0.58,0.04,0.38,0.30,'A SITE','a'],
+      [0.04,0.04,0.38,0.30,'B SITE','b'],
+      [0.34,0.36,0.28,0.24,'MID','mid'],
+      [0.20,0.76,0.24,0.18,'T-SPAWN','t'],
+      [0.72,0.76,0.24,0.18,'CT-SPAWN','ct'],
+      [0.04,0.36,0.24,0.36,'BANANA','other'],
+      [0.08,0.58,0.22,0.16,'APARTMENTS','other'],
+      [0.62,0.38,0.34,0.20,'LIBRARY','other'],
+    ],
+    lines:[[0.32,0.85,0.32,0.60],[0.32,0.60,0.16,0.40],[0.32,0.60,0.72,0.60],[0.72,0.60,0.84,0.85]]
+  },
+  Ancient: {
+    zones:[
+      [0.60,0.04,0.36,0.28,'A SITE','a'],
+      [0.04,0.04,0.36,0.28,'B SITE','b'],
+      [0.30,0.34,0.36,0.24,'MID','mid'],
+      [0.34,0.76,0.28,0.18,'T-SPAWN','t'],
+      [0.34,0.04,0.28,0.14,'CT-SPAWN','ct'],
+      [0.04,0.34,0.20,0.40,'CAVE','other'],
+      [0.72,0.34,0.22,0.40,'RIVER','other'],
+    ],
+    lines:[[0.48,0.94,0.48,0.58],[0.48,0.58,0.22,0.34],[0.48,0.58,0.74,0.34]]
+  },
+  Anubis: {
+    zones:[
+      [0.60,0.08,0.36,0.28,'A SITE','a'],
+      [0.04,0.08,0.36,0.28,'B SITE','b'],
+      [0.30,0.38,0.36,0.22,'MID','mid'],
+      [0.30,0.76,0.36,0.18,'T-SPAWN','t'],
+      [0.30,0.04,0.36,0.12,'CT-SPAWN','ct'],
+      [0.04,0.38,0.20,0.36,'CANAL','other'],
+      [0.72,0.38,0.22,0.36,'PALACE','other'],
+    ],
+    lines:[[0.48,0.94,0.48,0.60],[0.48,0.60,0.22,0.38],[0.48,0.60,0.78,0.38]]
+  },
+  Dust2: {
+    zones:[
+      [0.60,0.04,0.36,0.26,'A SITE','a'],
+      [0.04,0.36,0.28,0.26,'B SITE','b'],
+      [0.38,0.36,0.24,0.24,'MID','mid'],
+      [0.04,0.70,0.28,0.24,'T-SPAWN','t'],
+      [0.68,0.70,0.28,0.24,'CT-SPAWN','ct'],
+      [0.04,0.36,0.14,0.36,'LONG A','other'],
+      [0.38,0.04,0.18,0.24,'SHORT','other'],
+      [0.04,0.36,0.28,0.14,'B TUNNEL','other'],
+    ],
+    lines:[[0.18,0.82,0.18,0.43],[0.18,0.43,0.62,0.17],[0.48,0.60,0.74,0.82]]
+  },
+  Nuke: {
+    zones:[
+      [0.28,0.16,0.40,0.24,'A SITE (UPPER)','a'],
+      [0.28,0.50,0.40,0.24,'B SITE (LOWER)','b'],
+      [0.04,0.16,0.18,0.56,'OUTSIDE','mid'],
+      [0.72,0.16,0.24,0.36,'HEAVEN/HUT','other'],
+      [0.04,0.04,0.42,0.10,'T-SPAWN','t'],
+      [0.74,0.60,0.22,0.20,'CT-SPAWN','ct'],
+    ],
+    lines:[[0.28,0.40,0.28,0.50],[0.08,0.44,0.28,0.28],[0.68,0.28,0.74,0.40]]
+  },
+  Overpass: {
+    zones:[
+      [0.58,0.04,0.38,0.28,'A SITE','a'],
+      [0.04,0.34,0.32,0.28,'B SITE','b'],
+      [0.36,0.36,0.24,0.22,'MID','mid'],
+      [0.18,0.74,0.28,0.20,'T-SPAWN','t'],
+      [0.64,0.74,0.28,0.20,'CT-SPAWN','ct'],
+      [0.04,0.04,0.34,0.28,'CHANNEL','other'],
+      [0.72,0.34,0.24,0.26,'HEAVEN','other'],
+    ],
+    lines:[[0.32,0.84,0.32,0.62],[0.32,0.62,0.48,0.47],[0.48,0.47,0.76,0.47]]
+  },
+  Vertigo: {
+    zones:[
+      [0.58,0.14,0.36,0.30,'A SITE','a'],
+      [0.04,0.14,0.36,0.30,'B SITE','b'],
+      [0.30,0.50,0.36,0.20,'MID','mid'],
+      [0.04,0.04,0.26,0.08,'T-SPAWN','t'],
+      [0.70,0.04,0.26,0.08,'CT-SPAWN','ct'],
+      [0.04,0.74,0.40,0.20,'RAMP (T)','other'],
+      [0.56,0.74,0.40,0.20,'RAMP (CT)','other'],
+    ],
+    lines:[[0.17,0.12,0.17,0.44],[0.17,0.44,0.48,0.60],[0.79,0.12,0.79,0.44],[0.79,0.44,0.52,0.60]]
+  }
+};
+
+var ZONE_COLORS = {
+  a:     {fill:'rgba(56,189,248,0.10)',  stroke:'rgba(56,189,248,0.45)',  text:'#7dd3fc'},
+  b:     {fill:'rgba(251,146,60,0.10)',  stroke:'rgba(251,146,60,0.45)',  text:'#fdba74'},
+  t:     {fill:'rgba(225,29,72,0.12)',   stroke:'rgba(225,29,72,0.50)',   text:'#fb7185'},
+  ct:    {fill:'rgba(56,189,248,0.12)',  stroke:'rgba(56,189,248,0.50)',  text:'#38bdf8'},
+  mid:   {fill:'rgba(148,163,184,0.08)', stroke:'rgba(148,163,184,0.30)', text:'#94a3b8'},
+  other: {fill:'rgba(192,132,252,0.07)', stroke:'rgba(192,132,252,0.25)', text:'#c084fc'},
+};
+
+function drawSchematic(ctx, W, H, mapName){
+  // Feines Grid
+  ctx.strokeStyle='rgba(255,255,255,0.04)'; ctx.lineWidth=1;
+  var gs=W/24;
+  for(var gx=0;gx<=W;gx+=gs){ ctx.beginPath(); ctx.moveTo(gx,0); ctx.lineTo(gx,H); ctx.stroke(); }
+  for(var gy=0;gy<=H;gy+=gs){ ctx.beginPath(); ctx.moveTo(0,gy); ctx.lineTo(W,gy); ctx.stroke(); }
+
+  var data = MAP_ZONES[mapName];
+  if(!data){ // Generic fallback für unbekannte Maps
+    ctx.save(); ctx.font='900 '+Math.round(W*0.09)+'px Barlow Condensed,sans-serif';
+    ctx.fillStyle='rgba(255,255,255,0.06)'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(mapName.toUpperCase(),W/2,H/2); ctx.restore(); return;
+  }
+
+  // Korridore / Verbindungslinien
+  ctx.save(); ctx.strokeStyle='rgba(255,255,255,0.12)'; ctx.lineWidth=2; ctx.setLineDash([6,5]);
+  (data.lines||[]).forEach(function(l){
+    ctx.beginPath(); ctx.moveTo(l[0]*W,l[1]*H); ctx.lineTo(l[2]*W,l[3]*H); ctx.stroke();
+  });
+  ctx.setLineDash([]); ctx.restore();
+
+  // Zonen-Boxen
+  var fontSize = Math.max(10, Math.round(W*0.026));
+  data.zones.forEach(function(z){
+    var x=z[0]*W, y=z[1]*H, w=z[2]*W, h=z[3]*H, label=z[4], key=z[5];
+    var col=ZONE_COLORS[key]||ZONE_COLORS.other;
+    ctx.save();
+    // Fill
+    ctx.fillStyle=col.fill; ctx.fillRect(x,y,w,h);
+    // Border
+    ctx.strokeStyle=col.stroke; ctx.lineWidth=1.5; ctx.strokeRect(x,y,w,h);
+    // Corner accents
+    var cs=Math.min(w,h)*0.18;
+    ctx.strokeStyle=col.text; ctx.lineWidth=2;
+    [[x,y,1,1],[x+w,y,-1,1],[x,y+h,1,-1],[x+w,y+h,-1,-1]].forEach(function(c){
+      ctx.beginPath(); ctx.moveTo(c[0]+c[2]*cs,c[1]); ctx.lineTo(c[0],c[1]); ctx.lineTo(c[0],c[1]+c[3]*cs); ctx.stroke();
+    });
+    // Label
+    ctx.font='700 '+fontSize+'px Barlow Condensed,sans-serif';
+    ctx.fillStyle=col.text; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(label, x+w/2, y+h/2);
+    ctx.restore();
+  });
+
+  // Map-Name Watermark
+  ctx.save(); ctx.font='900 '+Math.round(W*0.07)+'px Barlow Condensed,sans-serif';
+  ctx.fillStyle='rgba(255,255,255,0.035)'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(mapName.toUpperCase(),W/2,H/2); ctx.restore();
+}
+
+// ── MapTool Klasse ───────────────────────────
+function MapTool(id){
+  var self=this;
+  self.canvas=document.getElementById(id);
+  self.ctx=self.canvas.getContext('2d');
+  self.markers=[]; self.arrows=[];
+  self.map='Mirage'; self.tool='ct';
+  self.ctCount=5; self.tCount=5;
+  self.arrowStart=null; self._rt=null;
+  self._imgCache={}; self._img=null;
+  self.scaleR=1.0; // Marker-Größen-Faktor (via Slider)
+
+  self.canvas.addEventListener('click',function(e){ self._onClick(e); });
+  self.canvas.addEventListener('touchend',function(e){ e.preventDefault(); self._onClick(e.changedTouches[0]); },{passive:false});
+  window.addEventListener('resize',function(){ clearTimeout(self._rt); self._rt=setTimeout(function(){ self.resize(); },120); });
+
+  self.load();         // erst Marker laden …
+  self._loadMapImg();  // … Kartenbild starten …
+  self.resize();       // … dann Größe setzen + einmal zeichnen
+  requestAnimationFrame(function(){ self.draw(); });
+}
+
+// Kartenbild laden (lokaler Pfad zuerst, dann URL-Fallback)
+MapTool.prototype._loadMapImg=function(){
+  var self=this;
+  var urls=(MAP_IMAGES[self.map]||[]).slice(); // Kopie
+  self._img=null;
+  if(!urls.length) return;
+
+  // Schon gecacht?
+  if(self._imgCache[self.map]){
+    self._img=self._imgCache[self.map];
+    return;
+  }
+  if(self._imgCache[self.map]===false) return; // alle URLs fehlgeschlagen
+
+  function tryNext(){
+    if(!urls.length){ self._imgCache[self.map]=false; self.draw(); return; }
+    var url=urls.shift();
+    var img=new Image();
+    img.onload=function(){ self._imgCache[self.map]=img; self._img=img; self.draw(); };
+    img.onerror=function(){ tryNext(); };
+    img.src=url;
+  }
+  tryNext();
+};
+
+MapTool.prototype.resize=function(){
+  var wrap=document.getElementById('map-wrap'); if(!wrap) return;
+  // clientWidth kann 0 sein wenn Panel gerade sichtbar wird → offsetWidth als Fallback
+  var w=wrap.clientWidth||wrap.offsetWidth||wrap.getBoundingClientRect().width||600;
+  w=Math.round(w);
+  if(w<50) return; // Panel noch nicht gerendert – abbrechen, nächster rAF kümmert sich
+  if(this.canvas.width===w&&this.canvas.height===w){ this.draw(); return; }
+  this.canvas.width=w; this.canvas.height=w; this.draw();
+};
+
+MapTool.prototype._getPos=function(e){
+  var rect=this.canvas.getBoundingClientRect();
+  return{x:(e.clientX-rect.left)/rect.width, y:(e.clientY-rect.top)/rect.height};
+};
+
+MapTool.prototype._onClick=function(e){
+  var pos=this._getPos(e);
+  var hint=document.getElementById('map-hint');
+
+  if(this.tool==='pfeil'){
+    if(!this.arrowStart){ this.arrowStart=pos; if(hint) hint.textContent='Endpunkt klicken…'; }
+    else{
+      var dx=pos.x-this.arrowStart.x, dy=pos.y-this.arrowStart.y;
+      if(dx*dx+dy*dy>0.0004) this.arrows.push({x1:this.arrowStart.x,y1:this.arrowStart.y,x2:pos.x,y2:pos.y});
+      this.arrowStart=null; if(hint) hint.textContent='Startpunkt klicken';
+      this.save(); this.draw();
+    }
+    return;
+  }
+
+  var W=this.canvas.width;
+  var thresh=(W*0.038)/W;
+  var idx=-1;
+  for(var i=0;i<this.markers.length;i++){
+    var m=this.markers[i];
+    if(Math.sqrt((m.x-pos.x)*(m.x-pos.x)+(m.y-pos.y)*(m.y-pos.y))<thresh){ idx=i; break; }
+  }
+  if(idx>=0){
+    var rem=this.markers.splice(idx,1)[0];
+    if(rem.type==='ct') this.ctCount=Math.max(0,this.ctCount-1);
+    if(rem.type==='t')  this.tCount =Math.max(0,this.tCount-1);
+  } else {
+    var label='';
+    if(this.tool==='ct'){ this.ctCount++; label='CT'+this.ctCount; }
+    else if(this.tool==='t'){ this.tCount++; label='T'+this.tCount; }
+    else{ label={smoke:'S',molotov:'M',flash:'F',he:'H'}[this.tool]||'?'; }
+    this.markers.push({x:pos.x,y:pos.y,type:this.tool,label:label});
+  }
+  this.save(); this.draw();
+};
+
+MapTool.prototype.draw=function(){
+  var ctx=this.ctx, W=this.canvas.width, H=this.canvas.height;
+  if(!W||!H) return;
+  var r=Math.round(W*0.022*this.scaleR);
+
+  // ── Hintergrund ────────────────────────────
+  ctx.fillStyle='#07070f'; ctx.fillRect(0,0,W,H);
+
+  if(this._img){
+    // Kartenbild: Cover-Fit (Seitenverhältnis erhalten, Mitte zentriert)
+    var iw=this._img.naturalWidth||this._img.width;
+    var ih=this._img.naturalHeight||this._img.height;
+    var scale=Math.max(W/iw, H/ih);
+    var dw=iw*scale, dh=ih*scale;
+    var dx=(W-dw)/2, dy=(H-dh)/2;
+    ctx.globalAlpha=0.82;
+    ctx.drawImage(this._img, dx, dy, dw, dh);
+    ctx.globalAlpha=1;
+    // Dunkler Overlay → Marker besser lesbar
+    ctx.fillStyle='rgba(0,0,0,0.22)'; ctx.fillRect(0,0,W,H);
+  } else {
+    // Schematic-Fallback: Zonen + Korridore je Map
+    drawSchematic(ctx, W, H, this.map);
+  }
+
+  // Arrows
+  var self=this;
+  this.arrows.forEach(function(a){
+    var x1=a.x1*W,y1=a.y1*H,x2=a.x2*W,y2=a.y2*H;
+    var angle=Math.atan2(y2-y1,x2-x1), hl=W*0.025;
+    ctx.save(); ctx.strokeStyle='#c084fc'; ctx.lineWidth=2.5;
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x2,y2); ctx.lineTo(x2-hl*Math.cos(angle-0.4),y2-hl*Math.sin(angle-0.4));
+    ctx.moveTo(x2,y2); ctx.lineTo(x2-hl*Math.cos(angle+0.4),y2-hl*Math.sin(angle+0.4));
+    ctx.stroke(); ctx.restore();
+  });
+  if(this.arrowStart){
+    ctx.save(); ctx.strokeStyle='rgba(192,132,252,0.5)'; ctx.lineWidth=2; ctx.setLineDash([5,4]);
+    ctx.beginPath(); ctx.arc(this.arrowStart.x*W,this.arrowStart.y*H,W*0.014,0,Math.PI*2); ctx.stroke();
+    ctx.setLineDash([]); ctx.restore();
+  }
+
+  // Markers
+  this.markers.forEach(function(m){
+    var x=Math.round(m.x*W), y=Math.round(m.y*H);
+    if(m.type==='ct')      drawCT(ctx,x,y,r,m.label);
+    else if(m.type==='t')  drawT(ctx,x,y,r,m.label);
+    else if(m.type==='smoke')   drawSmoke(ctx,x,y,r);
+    else if(m.type==='molotov') drawMolotov(ctx,x,y,r);
+    else if(m.type==='flash')   drawFlash(ctx,x,y,r);
+    else if(m.type==='he')      drawHE(ctx,x,y,r);
+  });
+};
+
+MapTool.prototype.setMap=function(name){
+  this.map=name; this.arrowStart=null;
+  this.load();
+  // Gecachtes Bild sofort setzen, sonst nachladen
+  this._img=(this._imgCache[name]&&this._imgCache[name]!==false)?this._imgCache[name]:null;
+  if(!this._img) this._loadMapImg();
+  this.draw();
+};
+MapTool.prototype.setTool=function(tool){
+  this.tool=tool; this.arrowStart=null;
+  var hint=document.getElementById('map-hint'); if(!hint) return;
+  hint.textContent=tool==='pfeil'?'Startpunkt klicken':'Klick = setzen · nochmal = löschen';
+};
+MapTool.prototype.reset=function(){
+  if(!confirm('Zurücksetzen? Alle Markierungen für '+this.map+' werden gelöscht.')) return;
+  this.markers=[]; this.arrows=[]; this.ctCount=0; this.tCount=0; this.arrowStart=null;
+  this.save(); this.draw();
+};
+MapTool.prototype.save=function(){
+  localStorage.setItem('dnd_map_'+this.map,JSON.stringify({markers:this.markers,arrows:this.arrows}));
+};
+MapTool.prototype.load=function(){
+  try{
+    var d=JSON.parse(localStorage.getItem('dnd_map_'+this.map));
+    if(d&&d.markers){ this.markers=d.markers; this.arrows=d.arrows||[]; }
+    else{ this.markers=[]; this.arrows=[]; }
+  } catch { this.markers=[]; this.arrows=[]; }
+  this.ctCount=this.markers.filter(function(m){ return m.type==='ct'; }).length;
+  this.tCount =this.markers.filter(function(m){ return m.type==='t';  }).length;
+};
+MapTool.prototype.saveDrawing=function(name){
+  var KEY='dnd_drawings', list;
+  try{ list=JSON.parse(localStorage.getItem(KEY))||[]; }catch{ list=[]; }
+  list.push({id:Date.now().toString(),name:name||(this.map+' #'+(list.length+1)),karte:this.map,
+    markers:JSON.parse(JSON.stringify(this.markers)),arrows:JSON.parse(JSON.stringify(this.arrows))});
+  localStorage.setItem(KEY,JSON.stringify(list)); renderDrawings();
+};
+MapTool.prototype.loadDrawing=function(d){
+  this.map=d.karte; this.markers=d.markers||[]; this.arrows=d.arrows||[];
+  this.ctCount=this.markers.filter(function(m){ return m.type==='ct'; }).length;
+  this.tCount =this.markers.filter(function(m){ return m.type==='t';  }).length;
+  this.arrowStart=null;
+  document.getElementById('map-select').value=d.karte;
+  this.draw();
+};
+
+// ── Init ────────────────────────────────────
+function initCanvas(){
+  mapCanvas=new MapTool('map-canvas');
+  // ResizeObserver als Sicherheitsnetz: falls erster Resize w=0 hatte, nochmal zeichnen
+  if(window.ResizeObserver){
+    var ro=new ResizeObserver(function(entries){
+      for(var i=0;i<entries.length;i++){
+        var w=Math.round(entries[i].contentRect.width);
+        if(w>50&&mapCanvas&&(mapCanvas.canvas.width!==w)){
+          mapCanvas.canvas.width=w; mapCanvas.canvas.height=w; mapCanvas.draw();
+        }
+      }
+    });
+    var wrap=document.getElementById('map-wrap');
+    if(wrap) ro.observe(wrap);
+  }
+
+  // Letzter Fallback: nach 200ms nochmal resize + draw falls Canvas noch leer ist
+  setTimeout(function(){
+    if(mapCanvas && mapCanvas.canvas.width < 50){
+      mapCanvas.resize();
+    } else if(mapCanvas){
+      mapCanvas.draw();
+    }
+  }, 200);
+
+  // Zoom-Slider
+  document.getElementById('map-zoom').addEventListener('input', function(){
+    var v = parseInt(this.value);
+    document.getElementById('map-zoom-val').textContent = v + '%';
+    document.getElementById('map-wrap').style.maxWidth = v + '%';
+    // ResizeObserver + manueller Trigger
+    clearTimeout(mapCanvas._rt);
+    mapCanvas._rt = setTimeout(function(){ mapCanvas.resize(); }, 60);
+  });
+
+  // Marker-Größen-Slider
+  document.getElementById('marker-size').addEventListener('input', function(){
+    var v = parseInt(this.value);
+    document.getElementById('marker-size-val').textContent = v + '%';
+    if(mapCanvas){ mapCanvas.scaleR = v / 100; mapCanvas.draw(); }
+  });
+
+  // Mausrad-Zoom
+  document.getElementById('map-wrap').addEventListener('wheel', function(e){
+    e.preventDefault();
+    var slider = document.getElementById('map-zoom');
+    var v = Math.max(30, Math.min(100, parseInt(slider.value) + (e.deltaY < 0 ? 5 : -5)));
+    slider.value = v;
+    document.getElementById('map-zoom-val').textContent = v + '%';
+    document.getElementById('map-wrap').style.maxWidth = v + '%';
+    clearTimeout(mapCanvas._rt);
+    mapCanvas._rt = setTimeout(function(){ mapCanvas.resize(); }, 60);
+  }, { passive: false });
+
+  document.getElementById('map-select').addEventListener('change',function(e){ mapCanvas.setMap(e.target.value); });
+  document.querySelectorAll('.tool-btn').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      document.querySelectorAll('.tool-btn').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active'); mapCanvas.setTool(btn.dataset.tool);
+    });
+  });
+  document.getElementById('clear-btn').addEventListener('click',function(){ mapCanvas.reset(); });
+  document.getElementById('save-drawing-btn').addEventListener('click',function(){
+    var name=document.getElementById('drawing-name').value.trim();
+    mapCanvas.saveDrawing(name);
+    var btn=document.getElementById('save-drawing-btn'),orig=btn.textContent;
+    btn.textContent='✓ Gespeichert'; setTimeout(function(){ btn.textContent=orig; },1500);
+  });
+  renderDrawings();
+}
+
+var KARTE_COLOR={ Mirage:'#f59e0b',Inferno:'#ef4444',Ancient:'#10b981',Anubis:'#8b5cf6',Dust2:'#f97316',Nuke:'#22c55e',Overpass:'#38bdf8',Vertigo:'#ec4899' };
+
+function renderDrawings(){
+  var c=document.getElementById('drawings-list'); if(!c) return;
+  var list; try{ list=JSON.parse(localStorage.getItem('dnd_drawings'))||[]; }catch{ list=[]; }
+  if(!list.length){ c.innerHTML='<div class="empty-hint">Noch keine Zeichnungen gespeichert.</div>'; return; }
+  c.innerHTML=list.map(function(d,i){
+    return '<div class="event-item">'+
+      '<span style="width:8px;height:8px;border-radius:50%;background:'+(KARTE_COLOR[d.karte]||'var(--muted)')+';flex-shrink:0;display:inline-block;"></span>'+
+      '<span class="event-title" style="font-weight:600;">'+d.name+'</span>'+
+      '<span class="badge b-muted" style="flex-shrink:0;">'+d.karte+'</span>'+
+      '<span class="badge b-muted" style="flex-shrink:0;font-size:9px;">'+(d.markers||[]).length+' Marker · '+(d.arrows||[]).length+' Pfeile</span>'+
+      '<div class="event-actions">'+
+      '<button class="btn btn-ghost btn-sm" onclick="loadDraw('+i+')">Laden</button>'+
+      '<button class="btn btn-danger btn-sm" onclick="delDraw('+i+')">✕</button>'+
+      '</div></div>';
+  }).join('');
+}
+function loadDraw(i){ try{ var l=JSON.parse(localStorage.getItem('dnd_drawings'))||[]; if(l[i]&&mapCanvas) mapCanvas.loadDrawing(l[i]); }catch{} }
+function delDraw(i){
+  if(!confirm('Löschen?')) return;
+  try{ var l=JSON.parse(localStorage.getItem('dnd_drawings'))||[]; l.splice(i,1); localStorage.setItem('dnd_drawings',JSON.stringify(l)); renderDrawings(); }catch{}
+}
+
+document.addEventListener('DOMContentLoaded', function(){ renderStrats(); });
+</script>
+</body>
+</html>

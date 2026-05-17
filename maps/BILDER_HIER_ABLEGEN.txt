@@ -1,0 +1,18 @@
+Lege hier deine CS2-Kartenbilder ab:
+
+  mirage.jpg
+  inferno.jpg
+  ancient.jpg
+  anubis.jpg
+  dust2.jpg
+  nuke.jpg
+  overpass.jpg
+  vertigo.jpg
+
+Format: JPG oder PNG, beliebige Auflösung (empfohlen: 1024x1024)
+Die offiziellen Radar-Übersichten findest du z.B. unter:
+  https://totalcsgo.com/maps
+  oder per Google: "cs2 mirage overhead map"
+
+Solange keine lokalen Bilder vorhanden sind, lädt das Stratbook
+die Bilder automatisch aus dem Internet (csgostats.gg CDN).
