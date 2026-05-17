@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Demos / VODs · DieDonuts Orga</title>
+<link rel="stylesheet" href="css/portal.css">
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <img src="https://donuts-esports.de/assets/logo_trans.png" alt="DieDonuts"
+      onerror="this.outerHTML='<span class=&quot;brand-fallback&quot;>DieDonuts</span>'">
+    <span class="intern-tag">Orga</span>
+  </div>
+  <nav class="nav" id="sidebar-nav"></nav>
+  <div class="sidebar-user">
+    <div class="user-av">L</div>
+    <div><div class="user-name">Lukas</div><div class="user-role">Owner · Pressesprecher</div></div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Demos / VODs</div>
+      <div class="page-sub">Demo-Links sammeln · Review-Notizen je Map & Gegner</div>
+    </div>
+  </div>
+
+  <div class="form-box">
+    <div class="form-box-title">+ Demo / VOD hinzufügen</div>
+    <form id="demo-form">
+      <div class="form-grid">
+        <div class="fg"><label>Titel *</label><input name="title" required placeholder="z.B. Scrim vs. XY · Map 1"></div>
+        <div class="fg"><label>Link (Demo / YouTube / Twitch)</label><input name="url" placeholder="https://..."></div>
+        <div class="fg"><label>Map</label>
+          <select name="map"><option value="">—</option><option>Mirage</option><option>Inferno</option><option>Ancient</option><option>Anubis</option><option>Dust2</option><option>Nuke</option><option>Overpass</option><option>Vertigo</option></select>
+        </div>
+        <div class="fg"><label>Gegner</label><input name="gegner" placeholder="Teamname"></div>
+        <div class="fg"><label>Datum</label><input name="date" type="date"></div>
+        <div class="fg" style="grid-column:1/-1;"><label>Review-Notizen</label><textarea name="notes" placeholder="Was ist aufgefallen? Fehler, Learnings, Fokus fürs nächste Mal..."></textarea></div>
+      </div>
+      <button type="submit" class="btn btn-primary">Speichern</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+      <div class="card-title" style="margin-bottom:0;">Sammlung</div>
+      <select id="demo-filter" class="filter-select">
+        <option value="">Alle Karten</option><option>Mirage</option><option>Inferno</option><option>Ancient</option><option>Anubis</option><option>Dust2</option><option>Nuke</option><option>Overpass</option><option>Vertigo</option>
+      </select>
+    </div>
+    <div id="demo-list"></div>
+  </div>
+</main>
+<script src="js/app.js"></script>
+</body>
+</html>

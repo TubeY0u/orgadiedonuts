@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lineups · DieDonuts Orga</title>
+<link rel="stylesheet" href="css/portal.css">
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <img src="https://donuts-esports.de/assets/logo_trans.png" alt="DieDonuts"
+      onerror="this.outerHTML='<span class=&quot;brand-fallback&quot;>DieDonuts</span>'">
+    <span class="intern-tag">Orga</span>
+  </div>
+  <nav class="nav" id="sidebar-nav"></nav>
+  <div class="sidebar-user">
+    <div class="user-av">L</div>
+    <div><div class="user-name">Lukas</div><div class="user-role">Owner · Pressesprecher</div></div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Lineups & Anwesenheit</div>
+      <div class="page-sub">Pro Match: wer startet · Standin · fehlt</div>
+    </div>
+  </div>
+
+  <div class="form-box">
+    <div class="form-box-title">+ Lineup festhalten</div>
+    <form id="lineup-form">
+      <div class="form-grid">
+        <div class="fg"><label>Datum *</label><input name="date" type="date" required></div>
+        <div class="fg"><label>Gegner</label><input name="gegner" placeholder="Teamname des Gegners"></div>
+        <div class="fg"><label>Team</label>
+          <select name="team"><option value="Main">Donuts Main</option><option value="Nxt">Donuts Nxt</option><option value="DNS">Donuts DNS</option></select>
+        </div>
+        <div class="fg"><label>Typ</label>
+          <select name="typ"><option value="">—</option><option>DachCS</option><option>ESEA</option><option>Scrim</option><option>Cup</option><option>Training</option></select>
+        </div>
+      </div>
+      <div style="margin:14px 0 10px;"><div class="card-title">Spieler-Status</div><div id="lineup-players"></div></div>
+      <div class="fg"><label>Notizen</label><input name="notes" placeholder="Absprachen, Ersatz, Hinweise..."></div>
+      <button type="submit" class="btn btn-primary">Lineup speichern</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Alle Lineups</div>
+    <div id="lineup-list"></div>
+  </div>
+</main>
+<script src="js/app.js"></script>
+</body>
+</html>

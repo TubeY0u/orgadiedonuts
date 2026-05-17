@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scouting · DieDonuts Orga</title>
+<link rel="stylesheet" href="css/portal.css">
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <img src="https://donuts-esports.de/assets/logo_trans.png" alt="DieDonuts"
+      onerror="this.outerHTML='<span class=&quot;brand-fallback&quot;>DieDonuts</span>'">
+    <span class="intern-tag">Orga</span>
+  </div>
+  <nav class="nav" id="sidebar-nav"></nav>
+  <div class="sidebar-user">
+    <div class="user-av">L</div>
+    <div><div class="user-name">Lukas</div><div class="user-role">Owner · Pressesprecher</div></div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Gegner-Scouting</div>
+      <div class="page-sub">Maps · Tendenzen · Schlüsselspieler</div>
+    </div>
+  </div>
+
+  <div class="form-box">
+    <div class="form-box-title">+ Gegner scouten</div>
+    <form id="scout-form">
+      <div class="form-grid">
+        <div class="fg"><label>Gegner *</label><input name="gegner" required placeholder="Teamname"></div>
+        <div class="fg"><label>Map-Pool / Picks</label><input name="maps" placeholder="z.B. Mirage, Ancient, Anubis"></div>
+        <div class="fg" style="grid-column:1/-1;"><label>Tendenzen / Spielweise</label><textarea name="tendenzen" placeholder="Bevorzugte Sides, Default-Setups, Eco-Verhalten, häufige Executes..."></textarea></div>
+        <div class="fg" style="grid-column:1/-1;"><label>Schlüsselspieler</label><textarea name="spieler" placeholder="Wer ist Star/AWP/IGL? Auffälligkeiten je Spieler..."></textarea></div>
+        <div class="fg"><label>Stand vom</label><input name="date" type="date"></div>
+      </div>
+      <button type="submit" class="btn btn-primary">Scouting speichern</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Gegner-Datenbank</div>
+    <div id="scout-list"></div>
+  </div>
+</main>
+<script src="js/app.js"></script>
+</body>
+</html>

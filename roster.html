@@ -3,14 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Roster · DieDonuts Esports</title>
-<link rel="stylesheet" href="css/main.css">
+<title>Roster · DieDonuts Orga</title>
+<link rel="stylesheet" href="css/portal.css">
 </head>
 <body>
 <aside class="sidebar">
   <div class="sidebar-logo">
-    <img src="https://donuts-esports.de/assets/logo_trans.png" alt="DieDonuts">
-    <span class="intern-tag">Intern</span>
+    <img src="https://donuts-esports.de/assets/logo_trans.png" alt="DieDonuts"
+      onerror="this.outerHTML='<span class=&quot;brand-fallback&quot;>DieDonuts</span>'">
+    <span class="intern-tag">Orga</span>
   </div>
   <nav class="nav" id="sidebar-nav"></nav>
   <div class="sidebar-user">
@@ -26,261 +27,12 @@
   <div class="page-header">
     <div>
       <div class="page-title">Roster</div>
-      <div class="page-sub">3 Teams · CS2 · DACH</div>
+      <div class="page-sub">Teams · Spieler · Standins · CS2 DACH</div>
     </div>
-    <a href="https://discord.gg/GEPrazXBrJ" target="_blank" class="btn btn-ghost">Discord → Tryout</a>
+    <button class="btn btn-ghost" id="roster-edit-btn">✎ Bearbeiten</button>
   </div>
 
-  <!-- Team Switch -->
-  <div class="team-sw">
-    <button class="team-sw-btn active" data-team="t-main">🍩 Main</button>
-    <button class="team-sw-btn" data-team="t-nxt">Nxt</button>
-    <button class="team-sw-btn" data-team="t-dns">DNS</button>
-  </div>
-
-  <!-- ══ MAIN ══ -->
-  <div class="team-panel active" id="t-main">
-    <div class="notice info" style="margin-bottom:16px;">
-      <span>ℹ️</span>
-      <span><strong>Donuts Main</strong> — DachCS S5 SPK4 · ESEA S56 Open10 · IGL: <strong>hALFY</strong></span>
-    </div>
-
-    <div class="player-grid">
-      <!-- hALFY -->
-      <div class="player-card">
-        <div class="player-photo">
-          <img src="https://donuts-esports.de/assets/players/halfy.png" alt="hALFY"
-            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-          <div class="player-photo-placeholder" style="display:none;">HA</div>
-          <div class="player-cap-badge">Captain · IGL</div>
-          <div class="player-lvl">🇩🇪 LVL 10</div>
-        </div>
-        <div class="player-info">
-          <div class="player-name">hALFY</div>
-          <div class="player-role">IGL · Team Captain</div>
-          <div class="player-flag">
-            <a href="https://www.faceit.com/de/players/hALFY" target="_blank" style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--blue);">FACEIT →</a>
-          </div>
-        </div>
-      </div>
-
-      <!-- chrizzW -->
-      <div class="player-card">
-        <div class="player-photo">
-          <img src="https://donuts-esports.de/assets/players/chrizzw.png" alt="chrizzW"
-            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-          <div class="player-photo-placeholder" style="display:none;">CH</div>
-          <div class="player-lvl">🇩🇪 LVL 10</div>
-        </div>
-        <div class="player-info">
-          <div class="player-name">chrizzW</div>
-          <div class="player-role">Veteran · Anchor</div>
-          <div class="player-flag">
-            <a href="https://www.faceit.com/de/players/chrizzW" target="_blank" style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--blue);">FACEIT →</a>
-          </div>
-        </div>
-      </div>
-
-      <!-- TubeYou / Lukas -->
-      <div class="player-card">
-        <div class="player-photo">
-          <img src="https://donuts-esports.de/assets/players/tubeyou.png" alt="TubeYou"
-            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-          <div class="player-photo-placeholder" style="display:none;">TU</div>
-          <div class="player-lvl">🇩🇪 Owner</div>
-        </div>
-        <div class="player-info">
-          <div class="player-name">TubeYou</div>
-          <div class="player-role">Entry · Pressesprecher</div>
-          <div class="player-flag">
-            <a href="https://www.faceit.com/de/players/TubeYou" target="_blank" style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--blue);">FACEIT →</a>
-          </div>
-        </div>
-      </div>
-
-      <!-- Open Spot 1 -->
-      <div class="player-open">
-        <div style="font-size:24px;color:var(--muted);">+</div>
-        <div class="player-open-label">Spot offen</div>
-        <a href="https://discord.gg/GEPrazXBrJ" target="_blank" style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--blue);">Discord → Tryout</a>
-      </div>
-
-      <!-- Open Spot 2 -->
-      <div class="player-open">
-        <div style="font-size:24px;color:var(--muted);">+</div>
-        <div class="player-open-label">Spot offen</div>
-        <a href="https://discord.gg/GEPrazXBrJ" target="_blank" style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--blue);">Discord → Tryout</a>
-      </div>
-    </div>
-
-    <hr>
-    <div class="card-title">Standins · Main</div>
-    <div class="standin-row">
-      <div class="standin-chip">
-        <img src="https://donuts-esports.de/assets/players/dolan.png" alt="dolan"
-          onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-        <div class="standin-chip-av" style="display:none">DO</div>
-        <div><div class="standin-name">dolan</div><div class="standin-sub">Standin · bereit</div></div>
-      </div>
-      <div class="standin-chip">
-        <img src="https://donuts-esports.de/assets/players/ibrakadabra.png" alt="ibrakadabras"
-          onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-        <div class="standin-chip-av" style="display:none">IB</div>
-        <div><div class="standin-name">ibrakadabras</div><div class="standin-sub">Standin · bereit</div></div>
-      </div>
-      <div class="standin-chip">
-        <img src="https://donuts-esports.de/assets/players/reda.png" alt="reda"
-          onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-        <div class="standin-chip-av" style="display:none">RE</div>
-        <div><div class="standin-name">reda</div><div class="standin-sub">Standin · bereit</div></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══ NXT ══ -->
-  <div class="team-panel" id="t-nxt">
-    <div class="notice info" style="margin-bottom:16px;">
-      <span>ℹ️</span>
-      <span><strong>Donuts Nxt</strong> — Academy Roster · 5 Spieler · Captain: <strong>-_-Calli</strong></span>
-    </div>
-    <div class="player-grid">
-      <div class="player-card">
-        <div class="player-photo">
-          <img src="https://donuts-esports.de/assets/players/calli.png" alt="-_-Calli"
-            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-          <div class="player-photo-placeholder" style="display:none;">CA</div>
-          <div class="player-cap-badge">Captain</div>
-          <div class="player-lvl">🇩🇪 LVL 4</div>
-        </div>
-        <div class="player-info">
-          <div class="player-name">-_-Calli</div>
-          <div class="player-role">Team Captain</div>
-          <a href="https://www.faceit.com/de/players/-_-Calli" target="_blank" style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--blue);">FACEIT →</a>
-        </div>
-      </div>
-      <div class="player-card">
-        <div class="player-photo">
-          <img src="https://donuts-esports.de/assets/players/tomac.png" alt="Tomac-"
-            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-          <div class="player-photo-placeholder" style="display:none;">TO</div>
-          <div class="player-lvl">🇳🇱 LVL 8</div>
-        </div>
-        <div class="player-info">
-          <div class="player-name">Tomac-</div>
-          <div class="player-role">Star Fragger</div>
-          <a href="https://www.faceit.com/de/players/Tomac-" target="_blank" style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--blue);">FACEIT →</a>
-        </div>
-      </div>
-      <div class="player-card">
-        <div class="player-photo">
-          <img src="https://donuts-esports.de/assets/players/kriistiin.png" alt="Kristin"
-            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-          <div class="player-photo-placeholder" style="display:none;">KR</div>
-          <div class="player-lvl">🇩🇪 LVL 6</div>
-        </div>
-        <div class="player-info">
-          <div class="player-name">Kristin</div>
-          <div class="player-role">Rifler</div>
-          <a href="https://www.faceit.com/de/players/Kristin" target="_blank" style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--blue);">FACEIT →</a>
-        </div>
-      </div>
-      <div class="player-card">
-        <div class="player-photo">
-          <img src="https://donuts-esports.de/assets/players/illiw29.png" alt="illiw29"
-            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-          <div class="player-photo-placeholder" style="display:none;">IL</div>
-          <div class="player-lvl">🇩🇪 LVL 4</div>
-        </div>
-        <div class="player-info">
-          <div class="player-name">illiw29</div>
-          <div class="player-role">Support</div>
-          <a href="https://www.faceit.com/de/players/illiw29" target="_blank" style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--blue);">FACEIT →</a>
-        </div>
-      </div>
-      <div class="player-card">
-        <div class="player-photo">
-          <img src="https://donuts-esports.de/assets/players/def4ult.png" alt="def4ult"
-            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-          <div class="player-photo-placeholder" style="display:none;">DE</div>
-          <div class="player-lvl">🇩🇪 LVL 6</div>
-        </div>
-        <div class="player-info">
-          <div class="player-name">def4ult</div>
-          <div class="player-role">Entry Fragger</div>
-          <a href="https://www.faceit.com/de/players/def4ult" target="_blank" style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--blue);">FACEIT →</a>
-        </div>
-      </div>
-    </div>
-    <hr>
-    <div class="card-title">Standin · Nxt</div>
-    <div class="standin-row">
-      <div class="standin-chip">
-        <img src="https://donuts-esports.de/assets/players/chenko.png" alt="chenko"
-          onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-        <div class="standin-chip-av" style="display:none">CH</div>
-        <div><div class="standin-name">chenko</div><div class="standin-sub">Standin · bereit</div></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══ DNS ══ -->
-  <div class="team-panel" id="t-dns">
-    <div class="notice warn" style="margin-bottom:16px;">
-      <span>⚠️</span>
-      <span><strong>Donuts DNS</strong> — In Aufbau · 3/5 Spieler · IGL: <strong>DNS-Olof</strong></span>
-    </div>
-    <div class="player-grid">
-      <div class="player-card">
-        <div class="player-photo">
-          <img src="https://donuts-esports.de/assets/players/Olof.png" alt="DNS-Olof"
-            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-          <div class="player-photo-placeholder" style="display:none;">OL</div>
-          <div class="player-cap-badge">Captain · IGL</div>
-          <div class="player-lvl">🇩🇪 LVL 7</div>
-        </div>
-        <div class="player-info">
-          <div class="player-name">DNS-Olof</div>
-          <div class="player-role">Captain · IGL</div>
-          <a href="https://www.faceit.com/de/players/Olof" target="_blank" style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--blue);">FACEIT →</a>
-        </div>
-      </div>
-      <div class="player-card">
-        <div class="player-photo">
-          <img src="https://donuts-esports.de/assets/players/lillifee.png" alt="LilliFee1987"
-            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-          <div class="player-photo-placeholder" style="display:none;">LI</div>
-          <div class="player-lvl">🇩🇪 LVL 8</div>
-        </div>
-        <div class="player-info">
-          <div class="player-name">LilliFee1987</div>
-          <div class="player-role">Rifler · Entry</div>
-          <a href="https://www.faceit.com/de/players/LilliFee1987" target="_blank" style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--blue);">FACEIT →</a>
-        </div>
-      </div>
-      <div class="player-card">
-        <div class="player-photo">
-          <img src="https://donuts-esports.de/assets/players/alex_dns.png" alt="lAL3Xl"
-            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-          <div class="player-photo-placeholder" style="display:none;">AL</div>
-          <div class="player-lvl">🇩🇪 LVL 5</div>
-        </div>
-        <div class="player-info">
-          <div class="player-name">lAL3Xl</div>
-          <div class="player-role">Rifler · Support</div>
-          <a href="https://www.faceit.com/de/players/alex" target="_blank" style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--blue);">FACEIT →</a>
-        </div>
-      </div>
-      <div class="player-open">
-        <div style="font-size:22px;color:var(--muted);">+</div>
-        <div class="player-open-label">Spot offen</div>
-      </div>
-      <div class="player-open">
-        <div style="font-size:22px;color:var(--muted);">+</div>
-        <div class="player-open-label">Spot offen</div>
-      </div>
-    </div>
-  </div>
-
+  <div id="roster-host"></div>
 </main>
 <script src="js/app.js"></script>
 </body>
