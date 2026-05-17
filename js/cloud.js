@@ -26,6 +26,19 @@
   var pushTimers = {};
   var renderTimer = null;
   var userEmail = '';
+  var OWNERS = (window.OWNER_EMAILS || []).map(function (e) { return String(e).toLowerCase().trim(); });
+
+  function applyRole(email) {
+    var isOwner = !email || OWNERS.indexOf(String(email).toLowerCase().trim()) > -1;
+    var role = isOwner ? 'owner' : 'member';
+    window.PORTAL_ROLE = role;
+    window.PORTAL_EMAIL = email || '';
+    document.body.classList.remove('role-owner', 'role-member');
+    document.body.classList.add('role-' + role);
+    return role;
+  }
+  // Standard bis Login geklärt: voll (z.B. Lokal-Modus = Owner)
+  applyRole('');
 
   /* ── localStorage-Hook: dnd_* Schreibzugriffe abfangen ───── */
   localStorage.setItem = function (k, v) {
@@ -68,7 +81,8 @@
   }
 
   /* ── Status-Chip + Userleiste ────────────────────────────── */
-  function injectChrome() {
+  function injectChrome(role) {
+    var roleLabel = role === 'owner' ? 'Owner · volle Rechte' : 'Mitglied · ansehen & eintragen';
     var chip = document.createElement('div');
     chip.id = 'cloud-chip';
     chip.style.cssText = 'position:fixed;right:14px;bottom:14px;z-index:480;' +
@@ -85,7 +99,9 @@
     var u = document.querySelector('.sidebar-user .user-name');
     var r = document.querySelector('.sidebar-user .user-role');
     if (u && userEmail) u.textContent = userEmail.split('@')[0];
-    if (r && userEmail) r.textContent = userEmail;
+    if (r) r.textContent = roleLabel;
+    var av = document.querySelector('.sidebar-user .user-av');
+    if (av && userEmail) av.textContent = userEmail.charAt(0).toUpperCase();
   }
   function setStatus(live) {
     var d = document.getElementById('cloud-dot'), t = document.getElementById('cloud-txt');
@@ -155,7 +171,8 @@
 
   /* ── Verbindung + Realtime ───────────────────────────────── */
   function connect() {
-    injectChrome();
+    var role = applyRole(userEmail);
+    injectChrome(role);
     setStatus(false);
     client.from(TABLE).select('key,data').then(function (res) {
       if (res.error) { setStatus(false); console.error('[Cloud] Laden:', res.error.message); return; }

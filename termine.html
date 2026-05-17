@@ -90,14 +90,24 @@
   <div class="g2" style="gap:20px;">
     <!-- Kalender -->
     <div class="card" style="margin-bottom:0;">
-      <div class="card-title" id="cal-month-label">Kalender</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <button class="btn btn-ghost btn-sm" id="cal-prev" title="Vorheriger Monat">‹</button>
+          <div id="cal-month-label" style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;min-width:150px;text-align:center;">Kalender</div>
+          <button class="btn btn-ghost btn-sm" id="cal-next" title="Nächster Monat">›</button>
+          <button class="btn btn-ghost btn-sm" id="cal-today">Heute</button>
+        </div>
+        <button class="btn btn-ghost btn-sm" id="cal-ics" title="Als .ics für Handy/Google/Apple-Kalender">⤓ .ics</button>
+      </div>
       <div class="cal-grid" id="cal-grid"></div>
       <!-- Legende -->
       <div style="display:flex;gap:14px;margin-top:12px;flex-wrap:wrap;">
-        <span style="font-family:'JetBrains Mono',monospace;font-size:9px;display:flex;align-items:center;gap:4px;color:var(--muted);"><span style="width:8px;height:8px;background:var(--red);border-radius:1px;display:inline-block;"></span>Training</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:9px;display:flex;align-items:center;gap:4px;color:var(--muted);"><span style="width:8px;height:8px;background:var(--pink);border-radius:1px;display:inline-block;"></span>Training</span>
         <span style="font-family:'JetBrains Mono',monospace;font-size:9px;display:flex;align-items:center;gap:4px;color:var(--muted);"><span style="width:8px;height:8px;background:var(--yellow);border-radius:1px;display:inline-block;"></span>Liga</span>
         <span style="font-family:'JetBrains Mono',monospace;font-size:9px;display:flex;align-items:center;gap:4px;color:var(--muted);"><span style="width:8px;height:8px;background:var(--blue);border-radius:1px;display:inline-block;"></span>Meeting</span>
         <span style="font-family:'JetBrains Mono',monospace;font-size:9px;display:flex;align-items:center;gap:4px;color:var(--muted);"><span style="width:8px;height:8px;background:var(--green);border-radius:1px;display:inline-block;"></span>Scrim</span>
+        <span style="width:1px;height:14px;background:var(--border2);"></span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:9px;display:flex;align-items:center;gap:4px;color:var(--muted);"><span style="width:8px;height:8px;border-left:3px solid var(--pink);display:inline-block;"></span>Balken = Team</span>
       </div>
     </div>
 
@@ -113,12 +123,5 @@
 <script src="js/supabase-config.js"></script>
 <script src="js/app.js"></script>
 <script src="js/cloud.js"></script>
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const now = new Date();
-    const label = document.getElementById('cal-month-label');
-    if (label) label.textContent = now.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
-  });
-</script>
 </body>
 </html>

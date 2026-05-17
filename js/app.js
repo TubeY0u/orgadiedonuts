@@ -139,6 +139,18 @@ function playerOptions(selected) {
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
 function deDate(d, opts) { try { return new Date(d).toLocaleDateString('de-DE', opts || { weekday: 'short', day: '2-digit', month: '2-digit' }); } catch { return d; } }
+function notifyDiscord(text) {
+  var url = window.DISCORD_WEBHOOK;
+  if (!url || url.indexOf('http') !== 0) return;
+  var who = window.PORTAL_EMAIL ? (' · ' + String(window.PORTAL_EMAIL).split('@')[0]) : '';
+  try {
+    fetch(url, {
+      method: 'POST', mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: 'DieDonuts Orga', content: text + who })
+    });
+  } catch (e) {}
+}
 function showSaved(btn) {
   if (!btn) return;
   const orig = btn.textContent;
@@ -350,9 +362,16 @@ function renderTermine() {
   };
   c.innerHTML = grp(up, 'Kommend') + grp(past, 'Vergangen');
 }
+let CAL_OFFSET = 0; // 0 = aktueller Monat, -1 = Vormonat, +1 = Folgemonat
+const TEAM_COLORS = { Main: 'var(--pink)', Nxt: 'var(--cyan)', DNS: 'var(--amber)', Alle: 'var(--muted2)' };
 function renderCalendar() {
   const cal = document.getElementById('cal-grid'); if (!cal) return;
-  const now = new Date(), y = now.getFullYear(), mo = now.getMonth();
+  const base = new Date();
+  const view = new Date(base.getFullYear(), base.getMonth() + CAL_OFFSET, 1);
+  const y = view.getFullYear(), mo = view.getMonth();
+  const isCurMonth = (y === base.getFullYear() && mo === base.getMonth());
+  const lbl = document.getElementById('cal-month-label');
+  if (lbl) lbl.textContent = view.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
   const offset = (new Date(y, mo, 1).getDay() + 6) % 7;
   const dim = new Date(y, mo + 1, 0).getDate();
   const byDay = {};
@@ -364,13 +383,53 @@ function renderCalendar() {
   let cells = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'].map(d => `<div class="cal-hd">${d}</div>`).join('');
   for (let i = 0; i < offset; i++) cells += '<div class="cal-day empty"></div>';
   for (let d = 1; d <= dim; d++) {
-    const isT = d === now.getDate();
+    const isT = isCurMonth && d === base.getDate();
     const ev = byDay[d] || [];
-    const evH = ev.slice(0, 2).map(e => `<div class="cal-ev ${cls[e.type] || 'ev-blue'}">${esc(e.title)}</div>`).join('');
+    const evH = ev.slice(0, 2).map(e =>
+      `<div class="cal-ev ${cls[e.type] || 'ev-blue'}" style="border-left:3px solid ${TEAM_COLORS[e.team] || 'var(--muted2)'}" title="${esc(e.title)} · ${esc(e.team || 'Alle')}">${esc(e.title)}</div>`).join('');
     const more = ev.length > 2 ? `<div style="font-size:9px;color:var(--muted);margin-top:2px;">+${ev.length - 2}</div>` : '';
     cells += `<div class="cal-day${isT ? ' today' : ''}"><div class="cal-day-num">${String(d).padStart(2, '0')}</div>${evH}${more}</div>`;
   }
   cal.innerHTML = cells;
+}
+function pad2(n) { return String(n).padStart(2, '0'); }
+function exportICS() {
+  const list = Store.get('termine').filter(eventInView);
+  if (!list.length) { alert('Keine Termine in dieser Ansicht zum Exportieren.'); return; }
+  let ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//DieDonuts//Orga//DE', 'CALSCALE:GREGORIAN'];
+  list.forEach(t => {
+    const d = (t.date || '').replace(/-/g, '');
+    if (!d) return;
+    ics.push('BEGIN:VEVENT');
+    ics.push('UID:' + t.id + '@diedonuts');
+    ics.push('DTSTAMP:' + new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z');
+    if (t.time) {
+      const hm = t.time.replace(':', '') + '00';
+      ics.push('DTSTART:' + d + 'T' + hm);
+      const eh = pad2((parseInt(t.time.split(':')[0], 10) + 1) % 24);
+      ics.push('DTEND:' + d + 'T' + eh + t.time.split(':')[1] + '00');
+    } else {
+      ics.push('DTSTART;VALUE=DATE:' + d);
+    }
+    ics.push('SUMMARY:' + (t.team && t.team !== 'Alle' ? '[' + t.team + '] ' : '') + (t.type ? t.type + ': ' : '') + (t.title || '').replace(/[\r\n,;]/g, ' '));
+    if (t.notes) ics.push('DESCRIPTION:' + String(t.notes).replace(/[\r\n,;]/g, ' '));
+    ics.push('END:VEVENT');
+  });
+  ics.push('END:VCALENDAR');
+  const blob = new Blob([ics.join('\r\n')], { type: 'text/calendar' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'diedonuts-kalender.ics';
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+}
+function initCalNav() {
+  const p = document.getElementById('cal-prev'), n = document.getElementById('cal-next'),
+    h = document.getElementById('cal-today'), i = document.getElementById('cal-ics');
+  if (p) p.addEventListener('click', () => { CAL_OFFSET--; renderCalendar(); });
+  if (n) n.addEventListener('click', () => { CAL_OFFSET++; renderCalendar(); });
+  if (h) h.addEventListener('click', () => { CAL_OFFSET = 0; renderCalendar(); });
+  if (i) i.addEventListener('click', exportICS);
 }
 function initTermineForm() {
   const form = document.getElementById('termin-form'); if (!form) return;
@@ -378,8 +437,12 @@ function initTermineForm() {
     e.preventDefault();
     const list = Store.get('termine');
     list.push({ id: uid(), title: form.title.value.trim(), date: form.date.value, time: form.time.value, type: form.type.value, team: form.team.value, notes: form.notes.value.trim() });
+    const tn = list[list.length - 1];
     Store.set('termine', list); form.reset();
     renderTermine(); renderCalendar(); updateNextEvent();
+    notifyDiscord('📅 **Neuer Termin:** ' + tn.title + ' — ' + tn.date +
+      (tn.time ? ' ' + tn.time + ' Uhr' : '') +
+      ' (' + (tn.team || 'Alle') + ' · ' + tn.type + ')');
     showSaved(form.querySelector('[type=submit]'));
   });
 }
@@ -456,8 +519,55 @@ function renderCups() {
   }
   const all = Store.get('cups');
   const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
-  set('stat-total', all.length); set('stat-w', all.filter(c => c.ergebnis === 'W').length);
-  set('stat-l', all.filter(c => c.ergebnis === 'L').length); set('stat-d', all.filter(c => c.ergebnis === 'D').length);
+  const w = all.filter(c => c.ergebnis === 'W').length;
+  const l = all.filter(c => c.ergebnis === 'L').length;
+  const dr = all.filter(c => c.ergebnis === 'D').length;
+  set('stat-total', all.length); set('stat-w', w); set('stat-l', l); set('stat-d', dr);
+  renderCupsStats(all, w, l, dr);
+}
+function renderCupsStats(all, w, l, dr) {
+  const host = document.getElementById('cups-stats'); if (!host) return;
+  if (!all.length) { host.innerHTML = '<div class="empty-hint">Noch keine Daten für Statistiken.</div>'; return; }
+  const dec = w + l;
+  const wr = dec ? Math.round((w / dec) * 100) : 0;
+  const byDate = all.slice().sort((a, b) => new Date(b.date) - new Date(a.date));
+  // Aktuelle Serie (nur W oder L, ab letztem Spiel)
+  let streak = 0, sChar = byDate[0] ? byDate[0].ergebnis : '';
+  for (const c of byDate) { if (c.ergebnis === sChar && sChar !== 'D') streak++; else break; }
+  const streakTxt = streak ? streak + (sChar === 'W' ? ' Siege' : ' Niederlagen') + ' in Folge' : '–';
+  // Letzte 5
+  const last5 = byDate.slice(0, 5).reverse().map(c => {
+    const m = { W: 'b-green', L: 'b-red', D: 'b-muted' };
+    return `<span class="badge ${m[c.ergebnis] || 'b-muted'}" style="min-width:24px;text-align:center;">${esc(c.ergebnis)}</span>`;
+  }).join(' ');
+  // je Liga
+  const ligas = {};
+  all.forEach(c => { const k = c.liga || 'Sonstiges'; (ligas[k] = ligas[k] || { w: 0, l: 0, d: 0 }); if (c.ergebnis === 'W') ligas[k].w++; else if (c.ergebnis === 'L') ligas[k].l++; else ligas[k].d++; });
+  // Top-Gegner
+  const opp = {};
+  all.forEach(c => { const k = c.gegner || '?'; (opp[k] = opp[k] || { n: 0, w: 0, l: 0, d: 0 }); opp[k].n++; if (c.ergebnis === 'W') opp[k].w++; else if (c.ergebnis === 'L') opp[k].l++; else opp[k].d++; });
+  const topOpp = Object.keys(opp).sort((a, b) => opp[b].n - opp[a].n).slice(0, 5);
+  const bar = `<div style="height:8px;border-radius:4px;overflow:hidden;display:flex;background:var(--bg3);margin:8px 0 4px;">
+      <div style="width:${dec ? (w / dec * 100) : 0}%;background:var(--green);"></div>
+      <div style="width:${dec ? (l / dec * 100) : 0}%;background:var(--red);"></div>
+    </div>`;
+  host.innerHTML = `
+    <div class="g3" style="margin-bottom:14px;">
+      <div class="tile" style="margin:0;"><div class="tile-val" style="color:var(--green);">${wr}%</div><div class="tile-label">Winrate (W/L)</div><div class="tile-sub">${w}–${l}${dr ? ' · ' + dr + ' U' : ''}</div></div>
+      <div class="tile" style="margin:0;"><div class="tile-val" style="color:${sChar === 'W' ? 'var(--green)' : sChar === 'L' ? 'var(--red)' : 'var(--text)'};">${streak || '–'}</div><div class="tile-label">Aktuelle Serie</div><div class="tile-sub">${esc(streakTxt)}</div></div>
+      <div class="tile" style="margin:0;"><div class="tile-label" style="margin-bottom:6px;">Letzte 5</div><div style="display:flex;gap:4px;flex-wrap:wrap;">${last5 || '–'}</div></div>
+    </div>
+    ${bar}
+    <div class="g2" style="margin:14px 0 0;">
+      <div>
+        <div class="list-section-label">Bilanz je Liga</div>
+        ${Object.keys(ligas).map(k => `<div class="info-row"><span class="info-label">${esc(k)}</span><span class="info-val">${ligas[k].w}–${ligas[k].l}${ligas[k].d ? '–' + ligas[k].d : ''}</span></div>`).join('')}
+      </div>
+      <div>
+        <div class="list-section-label">Häufigste Gegner</div>
+        ${topOpp.map(k => `<div class="info-row"><span class="info-label">${esc(k)}</span><span class="info-val">${opp[k].w}–${opp[k].l}${opp[k].d ? '–' + opp[k].d : ''} <span style="color:var(--muted);font-weight:600;">(${opp[k].n})</span></span></div>`).join('')}
+      </div>
+    </div>`;
 }
 function initCupsForm() {
   const form = document.getElementById('cups-form'); if (!form) return;
@@ -465,7 +575,11 @@ function initCupsForm() {
     e.preventDefault();
     const list = Store.get('cups');
     list.push({ id: uid(), team: form.team.value, date: form.date.value, liga: form.liga.value, gegner: form.gegner.value.trim(), ergebnis: form.ergebnis.value, score: form.score.value.trim(), maps: form.maps.value.trim(), notes: form.notes.value.trim() });
+    const cn = list[list.length - 1];
     Store.set('cups', list); form.reset(); renderCups();
+    const wl = { W: 'Sieg', L: 'Niederlage', D: 'Unentschieden' }[cn.ergebnis] || cn.ergebnis;
+    notifyDiscord('🏆 **Ergebnis (' + cn.team + '):** ' + wl + ' vs. ' + cn.gegner +
+      (cn.score ? ' ' + cn.score : '') + ' · ' + cn.liga);
     showSaved(form.querySelector('[type=submit]'));
   });
 }
@@ -793,9 +907,65 @@ function initNoteForm() {
     e.preventDefault();
     const list = Store.get('notes');
     list.push({ id: uid(), title: form.title.value.trim(), body: form.body.value.trim(), author: form.author.value.trim(), pinned: false, date: new Date().toISOString().slice(0, 10) });
+    const nn = list[list.length - 1];
     Store.set('notes', list); form.reset(); renderNotes();
+    notifyDiscord('📢 **Schwarzes Brett:** ' + nn.title + '\n' +
+      (nn.body || '').slice(0, 280));
     showSaved(form.querySelector('[type=submit]'));
   });
+}
+
+/* ─── DASHBOARD-WIDGETS ───────────────────────────────────── */
+function renderDashboard() {
+  const host = document.getElementById('dash-widgets'); if (!host) return;
+  const today = new Date(new Date().toDateString());
+  const in7 = new Date(today.getTime() + 7 * 86400000);
+  const week = Store.get('termine')
+    .filter(t => { const d = new Date(t.date); return d >= today && d < in7; })
+    .sort((a, b) => new Date(a.date) - new Date(b.date));
+  const tasks = Store.get('tasks').filter(t => (t.status || 'todo') !== 'done');
+  const av = Store.get('availability', {});
+  const dayKey = AV_DAYS[(new Date().getDay() + 6) % 7];
+  const players = allPlayers().filter(p => p.name.indexOf('(Standin)') === -1);
+  const yes = players.filter(p => av[p.id] && av[p.id][dayKey] === 'yes');
+  const maybe = players.filter(p => av[p.id] && av[p.id][dayKey] === 'maybe');
+  const pname = id => { const p = allPlayers().find(x => x.id === id); return p ? p.name : ''; };
+
+  host.innerHTML = `
+    <div class="card" style="margin:0;">
+      <div class="card-title">Diese Woche</div>
+      ${week.length ? week.slice(0, 5).map(t => `
+        <div class="event-item" style="padding:9px 0;">
+          <span class="event-date">${deDate(t.date)}</span>
+          <span class="event-dot" style="background:${TEAM_COLORS[t.team] || 'var(--muted2)'}"></span>
+          <span class="event-title">${esc(t.title)}${t.time ? ` <span class="mono" style="font-size:11px;color:var(--muted2)">· ${esc(t.time)}</span>` : ''}</span>
+          <span class="badge b-muted" style="font-size:9px;">${esc(t.team || 'Alle')}</span>
+        </div>`).join('') : '<div class="empty-hint" style="padding:18px;">Nichts in den nächsten 7 Tagen.</div>'}
+      <a href="termine.html" class="info-link" style="display:inline-block;margin-top:10px;">Zum Kalender →</a>
+    </div>
+    <div class="card" style="margin:0;">
+      <div class="card-title">Offene Aufgaben · ${tasks.length}</div>
+      ${tasks.length ? tasks.slice(0, 5).map(t => `
+        <div class="event-item" style="padding:9px 0;">
+          <span class="event-title">${esc(t.title)}</span>
+          ${t.assignee ? `<span class="badge b-blue" style="font-size:9px;">${esc(pname(t.assignee) || t.assignee)}</span>` : ''}
+          ${t.due ? `<span class="mono" style="font-size:10px;color:${new Date(t.due) < today ? 'var(--red)' : 'var(--muted2)'};">${deDate(t.due)}</span>` : ''}
+        </div>`).join('') : '<div class="empty-hint" style="padding:18px;">Keine offenen Aufgaben.</div>'}
+      <a href="planer.html" class="info-link" style="display:inline-block;margin-top:10px;">Zum Planer →</a>
+    </div>
+    <div class="card" style="margin:0;">
+      <div class="card-title">Verfügbar heute (${dayKey})</div>
+      <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:10px;">
+        <span style="font-family:'Barlow Condensed',sans-serif;font-size:34px;font-weight:900;color:var(--green);line-height:1;">${yes.length}</span>
+        <span style="color:var(--muted2);font-size:12px;">von ${players.length}${maybe.length ? ` · ${maybe.length} vielleicht` : ''}</span>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;">
+        ${yes.map(p => `<span class="badge b-green" style="font-size:9px;">${esc(p.name)}</span>`).join('')}
+        ${maybe.map(p => `<span class="badge b-yellow" style="font-size:9px;">${esc(p.name)}</span>`).join('')}
+        ${(!yes.length && !maybe.length) ? '<span style="color:var(--muted);font-size:12px;">Noch nichts eingetragen.</span>' : ''}
+      </div>
+      <a href="planer.html" class="info-link" style="display:inline-block;margin-top:10px;">Verfügbarkeit →</a>
+    </div>`;
 }
 
 /* ─── INIT ────────────────────────────────────────────────── */
@@ -807,9 +977,8 @@ function initOnce() {
   initTeamSwitch();
   initSimpleTabs();
   initCalSwitch();
+  initCalNav();
   initTermineForm();
-  const lbl = document.getElementById('cal-month-label');
-  if (lbl) lbl.textContent = new Date().toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
   initTrainingForm();
   initCupsForm();
   const reb = document.getElementById('roster-edit-btn');
@@ -831,6 +1000,7 @@ function renderAll() {
   renderDemos();
   renderScout();
   renderNotes();
+  renderDashboard();
   // Stratbook (eigenes Inline-Script) mitziehen, falls vorhanden
   try { if (typeof renderStrats === 'function') renderStrats(); } catch (e) {}
   try { if (typeof renderDrawings === 'function') renderDrawings(); } catch (e) {}

@@ -664,6 +664,13 @@ hr { border: none; height: 1px; background: linear-gradient(90deg, transparent, 
 .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 200; }
 .sidebar-overlay.active { display: block; }
 
+/* ─── ROLLEN: Mitglieder ohne Löschrechte ─────────────────── */
+/* Mitglied = ansehen + eintragen + bearbeiten, ABER nicht löschen,
+   nicht Roster ändern, nicht Backup importieren (Daten überschreiben). */
+body.role-member .btn-danger,
+body.role-member #roster-edit-btn,
+body.role-member #backup-import { display: none !important; }
+
 /* ─── SCROLLBAR ───────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
