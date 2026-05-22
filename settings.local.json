@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git init *)",
+      "Bash(git config *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git rm *)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" https://tubey0u.github.io/orgadiedonuts/)",
+      "Bash(curl -s https://tubey0u.github.io/orgadiedonuts/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" https://tubey0u.github.io/orgadiedonuts/index.html)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" https://tubey0u.github.io/orgadiedonuts/css/portal.css)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" https://tubey0u.github.io/orgadiedonuts/js/app.js)",
+      "Bash(curl -s https://api.github.com/repos/tubey0u/orgadiedonuts/git/trees/main?recursive=1)",
+      "Bash(curl -s https://api.github.com/repos/tubey0u/orgadiedonuts)",
+      "Bash(gh auth *)",
+      "Bash(curl -s 'https://tubey0u.github.io/orgadiedonuts/css/portal.css?x=__TRACKED_VAR__')",
+      "Bash(curl -s 'https://tubey0u.github.io/orgadiedonuts/js/app.js?x=__TRACKED_VAR__')",
+      "Bash(curl -s -o /dev/null -w 'portal.css: %{content_type}\\\\n' 'https://tubey0u.github.io/orgadiedonuts/css/portal.css?y=__TRACKED_VAR__')",
+      "Bash(curl -s -o /dev/null -w 'app.js:     %{content_type}\\\\n' 'https://tubey0u.github.io/orgadiedonuts/js/app.js?y=__TRACKED_VAR__')",
+      "Bash(curl -s -o /dev/null -w \"planer:     %{http_code}\\\\n\" \"https://tubey0u.github.io/orgadiedonuts/planer.html\")",
+      "mcp__Claude_in_Chrome__list_connected_browsers",
+      "mcp__Claude_in_Chrome__tabs_context_mcp",
+      "mcp__Claude_in_Chrome__navigate",
+      "mcp__Claude_in_Chrome__computer",
+      "mcp__Claude_in_Chrome__read_page",
+      "mcp__Claude_in_Chrome__find",
+      "mcp__Claude_in_Chrome__form_input",
+      "mcp__Claude_in_Chrome__javascript_tool"
+    ]
+  }
+}
