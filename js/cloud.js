@@ -114,10 +114,14 @@
   /* -- Logout ------------------------------------------------ */
   function logout() {
     if (!confirm('Abmelden?')) return;
+    // Portal-Daten löschen
     Object.keys(localStorage).filter(function (k) { return k.indexOf(PREFIX) === 0; })
       .forEach(function (k) { rawRemove(k); });
+    // Supabase Auth-Token MANUELL löschen (signOut allein ist nicht zuverlässig)
+    Object.keys(localStorage).filter(function (k) { return k.indexOf('sb-') === 0; })
+      .forEach(function (k) { rawRemove(k); });
     if (client) {
-      client.auth.signOut().then(function () { location.reload(); });
+      client.auth.signOut().then(function () { location.reload(); }, function () { location.reload(); });
     } else {
       location.reload();
     }
@@ -332,22 +336,31 @@
         return;
       }
       if (!CONFIGURED) {
-        var n = document.createElement('div');
-        n.style.cssText = 'position:fixed;right:14px;bottom:14px;z-index:480;font-family:JetBrains Mono,monospace;font-size:11px;background:rgba(10,11,18,.92);border:1px solid var(--border2);border-left:3px solid var(--yellow);padding:8px 13px;border-radius:9px;color:var(--muted2);';
-        n.textContent = 'Lokal-Modus \xb7 kein Live-Sync';
-        document.body.appendChild(n);
+        var nc = document.createElement('div');
+        nc.style.cssText = 'position:fixed;right:14px;bottom:14px;z-index:480;font-family:JetBrains Mono,monospace;font-size:11px;background:rgba(10,11,18,.92);border:1px solid var(--border2);border-left:3px solid var(--yellow);padding:8px 13px;border-radius:9px;color:var(--muted2);';
+        nc.textContent = 'Lokal-Modus \xb7 kein Live-Sync';
+        document.body.appendChild(nc);
         return;
       }
       if (!window.supabase || !window.supabase.createClient) {
-        console.error('[Cloud] Supabase nicht geladen.');
+        console.error('[Cloud] Supabase nicht geladen – zeige Login-Screen.');
+        overlay(true);
         return;
       }
       client = window.supabase.createClient(URL, KEY);
       client.auth.getSession().then(function (res) {
         var s = res.data && res.data.session;
-        if (s && s.user) { userEmail = s.user.email; overlay(false); connect(); }
-        else { overlay(true); }
-      }).catch(function () { overlay(true); });
+        if (s && s.user && s.user.email) {
+          userEmail = s.user.email;
+          overlay(false);
+          connect();
+        } else {
+          overlay(true);
+        }
+      }).catch(function (err) {
+        console.error('[Cloud] getSession Fehler:', err);
+        overlay(true);
+      });
     }
   };
   window.PortalCloud = PortalCloud;
