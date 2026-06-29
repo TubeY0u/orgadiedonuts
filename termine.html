@@ -58,12 +58,17 @@
             <option value="ESEA">ESEA</option>
             <option value="Scrimmage">Scrimmage</option>
             <option value="Meeting">Meeting</option>
+            <option value="Cup">Cup</option>
             <option value="Sonstiges">Sonstiges</option>
           </select>
         </div>
         <div class="fg">
-          <label>Datum *</label>
+          <label>Von *</label>
           <input name="date" type="date" required>
+        </div>
+        <div class="fg">
+          <label>Bis (optional, mehrtägig)</label>
+          <input name="date_end" type="date">
         </div>
         <div class="fg">
           <label>Uhrzeit</label>
@@ -106,6 +111,7 @@
         <span style="font-family:'JetBrains Mono',monospace;font-size:9px;display:flex;align-items:center;gap:4px;color:var(--muted);"><span style="width:8px;height:8px;background:var(--yellow);border-radius:1px;display:inline-block;"></span>Liga</span>
         <span style="font-family:'JetBrains Mono',monospace;font-size:9px;display:flex;align-items:center;gap:4px;color:var(--muted);"><span style="width:8px;height:8px;background:var(--blue);border-radius:1px;display:inline-block;"></span>Meeting</span>
         <span style="font-family:'JetBrains Mono',monospace;font-size:9px;display:flex;align-items:center;gap:4px;color:var(--muted);"><span style="width:8px;height:8px;background:var(--green);border-radius:1px;display:inline-block;"></span>Scrim</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:9px;display:flex;align-items:center;gap:4px;color:var(--muted);"><span style="width:8px;height:8px;background:var(--orange,#ff6b00);border-radius:1px;display:inline-block;"></span>Cup</span>
         <span style="width:1px;height:14px;background:var(--border2);"></span>
         <span style="font-family:'JetBrains Mono',monospace;font-size:9px;display:flex;align-items:center;gap:4px;color:var(--muted);"><span style="width:8px;height:8px;border-left:3px solid var(--pink);display:inline-block;"></span>Balken = Team</span>
       </div>

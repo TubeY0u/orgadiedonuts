@@ -1176,3 +1176,9 @@ document.addEventListener('DOMContentLoaded', function() {
     PortalCloud.boot();
   }
 });
+l(); // sofortiger Erst-Render aus lokalem Cache
+  // Cloud-Sync übernimmt ab jetzt (falls konfiguriert) — siehe cloud.js
+  if (window.PortalCloud && typeof PortalCloud.boot === 'function') {
+    PortalCloud.boot();
+  }
+});

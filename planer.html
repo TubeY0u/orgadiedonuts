@@ -52,6 +52,26 @@
 
   <!-- VERFÜGBARKEIT -->
   <div data-tabpanel="pl" id="pl-avail" style="display:none;">
+    <div class="form-box" style="margin-bottom:18px;">
+      <div class="form-box-title">🏖 Urlaub / Abwesenheit eintragen</div>
+      <form id="urlaub-form">
+        <div class="form-grid">
+          <div class="fg">
+            <label>Spieler *</label>
+            <select name="pid" id="urlaub-pid" required></select>
+          </div>
+          <div class="fg">
+            <label>Von *</label>
+            <input name="von" type="date" required>
+          </div>
+          <div class="fg">
+            <label>Bis *</label>
+            <input name="bis" type="date" required>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Abwesenheit speichern</button>
+      </form>
+    </div>
     <div class="card">
       <div class="card-title">Wer kann wann? (Scrims / Training)</div>
       <div id="avail-host"></div>

@@ -17,7 +17,8 @@ window.SUPABASE_ANON_KEY = "sb_publishable_C2cbt1pyhZS_NjiLlWCiVg_fo2B1kcY";
    + bearbeiten, aber NICHT löschen / Roster ändern).
    Weitere Owner: einfach mit Komma ergänzen, speichern, git push. */
 window.OWNER_EMAILS = [
-  "tubeyoutv23@gmail.com"
+  "tubeyoutv23@gmail.com",
+  "staudinger.l@icloud.com"
 ];
 
 /* ─── Discord-Benachrichtigungen (optional) ────────────────────

@@ -37,6 +37,14 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase-config.js"></script>
 <script src="js/app.js"></script>
+<script src="js/faceit-config.js"></script>
+<script src="js/faceit.js"></script>
+<script>
+  // Stats nachladen sobald Roster gerendert ist
+  document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(injectRosterStats, 600);
+  });
+</script>
 <script src="js/cloud.js"></script>
 </body>
 </html>
