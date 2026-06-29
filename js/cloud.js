@@ -126,11 +126,13 @@
   /* -- Auth-Overlay ------------------------------------------ */
   function overlay(show) {
     var o = document.getElementById('auth-overlay');
+    var sidebar = document.querySelector('.sidebar');
     if (!o && show) {
+      if (sidebar) sidebar.style.zIndex = '0';
       o = document.createElement('div');
       o.id = 'auth-overlay';
       o.style.cssText =
-        'position:fixed;inset:0;z-index:9000;display:flex;' +
+        'position:fixed;inset:0;z-index:99999;display:flex;' +
         'align-items:center;justify-content:center;padding:20px;' +
         'background:radial-gradient(900px 500px at 50% -10%,rgba(255,77,141,.14),transparent 60%),' +
         '#0a0b12;';
@@ -266,7 +268,7 @@
         el.addEventListener('blur',  function() { el.style.borderColor='#242a40'; el.style.boxShadow='none'; });
       });
     }
-    if (o && !show) { o.remove(); }
+    if (o && !show) { o.remove(); if (sidebar) sidebar.style.zIndex = ''; }
   }
 
   /* -- Verbindung + Realtime ---------------------------------- */
