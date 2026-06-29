@@ -47,6 +47,9 @@
 
   <div class="g3" id="dash-widgets"></div>
 
+  <!-- KRCUP Live Widget -->
+  <div class="card" id="faceit-cup-widget" style="margin-bottom:20px;"></div>
+
   <div class="g2">
     <!-- Schwarzes Brett -->
     <div class="card">
@@ -92,19 +95,42 @@
     </div>
   </div>
 
-  <div class="card">
-    <div class="card-title">Letzter Spieltag · Interview</div>
-    <div style="position:relative;padding-bottom:42%;height:0;overflow:hidden;border-radius:10px;border:1px solid var(--border);">
-      <iframe src="https://www.youtube.com/embed/L2w7Et2BPfI?rel=0&modestbranding=1"
-        style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen></iframe>
+  <div class="g2" style="gap:20px;">
+    <div class="card" style="margin:0;">
+      <div class="card-title">Letzter Spieltag · Interview</div>
+      <div style="position:relative;padding-bottom:56%;height:0;overflow:hidden;border-radius:10px;border:1px solid var(--border);">
+        <iframe src="https://www.youtube.com/embed/L2w7Et2BPfI?rel=0&modestbranding=1"
+          style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen></iframe>
+      </div>
+    </div>
+    <div class="card" style="margin:0;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div class="card-title" style="margin:0;">🟣 Streams</div>
+        <a href="https://www.twitch.tv/halfy_cs" target="_blank" class="btn btn-ghost btn-sm" style="color:#9146ff;">Twitch öffnen →</a>
+      </div>
+      <!-- Twitch Player: halfy_cs -->
+      <div id="twitch-player-wrap" style="position:relative;padding-bottom:56%;height:0;overflow:hidden;border-radius:10px;border:1px solid var(--border);background:#0e0e10;">
+        <iframe
+          src="https://player.twitch.tv/?channel=halfy_cs&parent=localhost&parent=donuts-esports.de&parent=tubey0u.github.io&muted=true"
+          style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;"
+          allowfullscreen>
+        </iframe>
+      </div>
+      <div style="margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted2);">
+        hALFY · IGL · <a href="https://www.twitch.tv/halfy_cs" target="_blank" style="color:#9146ff;">twitch.tv/halfy_cs</a>
+      </div>
     </div>
   </div>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase-config.js"></script>
 <script src="js/app.js"></script>
-<script src="js/cloud.js"></script>
-</body>
-</html>
+<script src="js/faceit-config.js"></script>
+<script src="js/faceit.js"></script>
+<script>
+  renderFaceitWidget('faceit-cup-widget');
+  updateFaceitBanner();
+</script>
+<script src="js/cloud.js"><

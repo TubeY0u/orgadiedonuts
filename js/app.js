@@ -9,7 +9,7 @@ const Store = {
   PREFIX: 'dnd_',
   VERSION: 2,
   keys: ['roster','termine','training','cups','strats','tasks',
-         'availability','lineups','demos','scouting','notes'],
+         'availability','urlaub','lineups','demos','scouting','notes'],
 
   get(k, fb) {
     if (fb === undefined) fb = [];
@@ -84,11 +84,13 @@ const DEFAULT_ROSTER = {
       id: 'main', name: 'Donuts Main', tag: '🍩 Main', tone: 'info',
       info: 'DachCS S5 SPK4 · ESEA S56 Open10 · IGL: hALFY',
       players: [
-        { id: 'p_halfy',   name: 'hALFY',   role: 'IGL · Team Captain',     lvl: '🇩🇪 LVL 10', captain: true,  faceit: 'hALFY' },
-        { id: 'p_chrizzw', name: 'chrizzW', role: 'Veteran · Anchor',       lvl: '🇩🇪 LVL 10', captain: false, faceit: 'chrizzW' },
-        { id: 'p_tubeyou', name: 'TubeYou', role: 'Entry · Pressesprecher', lvl: '🇩🇪 Owner',  captain: false, faceit: 'TubeYou' }
+        { id: 'p_halfy',   name: 'hALFY',   role: 'IGL · Team Captain',     lvl: '🇩🇪 LVL 10', captain: true,  faceit: 'hALFY',   faceit_id: '024be859-e215-42dd-a7ed-18f7bbf91b3c', twitch: 'halfy_cs', photo: 'assets/players/hALFY.svg' },
+        { id: 'p_chrizzw', name: 'chrizzW', role: 'Veteran · Anchor',       lvl: '🇩🇪 LVL 10', captain: false, faceit: 'chrizzW', faceit_id: 'e0f0313c-c2aa-4e8a-9874-8eb2be3d628d',                       photo: 'assets/players/chrizzW.svg' },
+        { id: 'p_tubeyou', name: 'TubeYou', role: 'Entry · Pressesprecher', lvl: '🇩🇪 LVL 10', captain: false, faceit: 'TubeYou', faceit_id: '244c5587-9730-4577-9d81-fb070974eda2',                       photo: 'assets/players/TubeYou.svg' },
+        { id: 'p_svn',     name: 'svN--',   role: 'Allrounder',             lvl: '🇩🇪 LVL 9',  captain: false, faceit: 'svN--',   faceit_id: '824221b9-8639-4e24-a87b-f5b17f66fdcb',                       photo: 'assets/players/svN__.svg' },
+        { id: 'p_rdx',     name: 'rdX',     role: 'Second AWP',             lvl: '🇩🇪 LVL 10', captain: false, faceit: 'rdX',     faceit_id: 'd3926009-9971-4936-8a9e-9ffed426aefd',                       photo: 'assets/players/rdX.svg' }
       ],
-      open: 2,
+      open: 0,
       standins: [{ id: 's_dolan', name: 'dolan' }, { id: 's_ibra', name: 'ibrakadabras' }, { id: 's_reda', name: 'reda' }]
     },
     {
@@ -259,7 +261,35 @@ function initMobile() {
     'onerror="this.outerHTML=\'<span style=&quot;margin-left:auto;font-family:Barlow Condensed;font-weight:900;color:var(--pink);&quot;>DIEDONUTS</span>\'">';
   main.insertBefore(mh, main.firstChild);
   document.getElementById('hamburger-btn').addEventListener('click', openSidebar);
+
+  // ─ Bottom Navigation Bar ─
+  injectBottomNav();
 }
+
+function injectBottomNav() {
+  const current = location.pathname.split('/').pop() || 'index.html';
+  const items = [
+    { href: 'index.html',    icon: '⌂',  label: 'Home' },
+    { href: 'termine.html',  icon: '▦',  label: 'Kalender' },
+    { href: 'planer.html',   icon: '☰',  label: 'Planer' },
+    { href: 'roster.html',   icon: '◧',  label: 'Team' },
+    { href: 'stratbook.html',icon: '◉',  label: 'Strats' },
+  ];
+  const nav = document.createElement('nav');
+  nav.className = 'bottom-nav';
+  nav.setAttribute('aria-label', 'Navigation');
+  nav.innerHTML = '<div class="bottom-nav-inner">' +
+    items.map(it => {
+      const active = (current === it.href || (current === '' && it.href === 'index.html')) ? ' active' : '';
+      return `<a href="${it.href}" class="bottom-nav-item${active}" aria-label="${it.label}">` +
+        `<span class="bottom-nav-icon">${it.icon}</span>` +
+        `<span class="bottom-nav-label">${it.label}</span>` +
+        `</a>`;
+    }).join('') +
+  '</div>';
+  document.body.appendChild(nav);
+}
+
 function openSidebar() {
   document.querySelector('.sidebar').classList.add('open');
   document.getElementById('sidebar-overlay').classList.add('active');
@@ -339,12 +369,18 @@ function deleteTermin(id) {
   Store.set('termine', Store.get('termine').filter(t => t.id !== id));
   renderTermine(); renderCalendar(); updateNextEvent();
 }
+function terminEndDate(t) { return t.date_end && t.date_end >= t.date ? t.date_end : t.date; }
+function terminDateLabel(t) {
+  const end = terminEndDate(t);
+  if (end !== t.date) return deDate(t.date, {day:'2-digit',month:'2-digit'}) + ' – ' + deDate(end, {weekday:'short',day:'2-digit',month:'2-digit'});
+  return deDate(t.date);
+}
 function renderTermine() {
   const c = document.getElementById('termine-list'); if (!c) return;
   const list = Store.get('termine').filter(eventInView).sort((a, b) => new Date(a.date) - new Date(b.date));
   const today = new Date(new Date().toDateString());
-  const up = list.filter(t => new Date(t.date) >= today);
-  const past = list.filter(t => new Date(t.date) < today);
+  const up = list.filter(t => new Date(terminEndDate(t)) >= today);
+  const past = list.filter(t => new Date(terminEndDate(t)) < today);
   if (!list.length) { c.innerHTML = '<div class="empty-hint">Noch keine Termine eingetragen.</div>'; return; }
   const dots = { Training: 'var(--pink)', DachCS: 'var(--yellow)', ESEA: 'var(--yellow)', Meeting: 'var(--blue)', Scrimmage: 'var(--green)', Sonstiges: 'var(--muted2)' };
   const bg = { Training: 'b-red', DachCS: 'b-yellow', ESEA: 'b-yellow', Meeting: 'b-blue', Scrimmage: 'b-green', Sonstiges: 'b-muted' };
@@ -352,7 +388,7 @@ function renderTermine() {
     if (!items.length) return '';
     return `<div class="list-section-label">${title}</div>` + items.map(t =>
       `<div class="event-item">
-        <span class="event-date">${deDate(t.date)}</span>
+        <span class="event-date">${terminDateLabel(t)}</span>
         <span class="event-dot" style="background:${dots[t.type] || 'var(--muted2)'}"></span>
         <span class="event-title">${esc(t.title)}${t.time ? ` <span class="mono" style="font-size:11px;color:var(--muted2)"> · ${esc(t.time)} Uhr</span>` : ''}${t.team && t.team !== 'Alle' ? ` <span class="badge b-muted" style="font-size:9px;margin-left:4px;">${esc(t.team)}</span>` : ''}</span>
         ${t.notes ? `<span class="event-note" title="${esc(t.notes)}">💬 ${esc(t.notes)}</span>` : ''}
@@ -376,8 +412,11 @@ function renderCalendar() {
   const dim = new Date(y, mo + 1, 0).getDate();
   const byDay = {};
   Store.get('termine').filter(eventInView).forEach(t => {
-    const d = new Date(t.date);
-    if (d.getFullYear() === y && d.getMonth() === mo) { const k = d.getDate(); (byDay[k] = byDay[k] || []).push(t); }
+    const start = new Date(t.date);
+    const end = t.date_end && t.date_end >= t.date ? new Date(t.date_end) : new Date(t.date);
+    for (let cur = new Date(start); cur <= end; cur.setDate(cur.getDate() + 1)) {
+      if (cur.getFullYear() === y && cur.getMonth() === mo) { const k = cur.getDate(); (byDay[k] = byDay[k] || []).push(t); }
+    }
   });
   const cls = { Training: 'ev-red', DachCS: 'ev-yellow', ESEA: 'ev-yellow', Meeting: 'ev-blue', Scrimmage: 'ev-green', Sonstiges: 'ev-blue' };
   let cells = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'].map(d => `<div class="cal-hd">${d}</div>`).join('');
@@ -436,7 +475,8 @@ function initTermineForm() {
   form.addEventListener('submit', e => {
     e.preventDefault();
     const list = Store.get('termine');
-    list.push({ id: uid(), title: form.title.value.trim(), date: form.date.value, time: form.time.value, type: form.type.value, team: form.team.value, notes: form.notes.value.trim() });
+    const dateEnd = form.date_end && form.date_end.value && form.date_end.value >= form.date.value ? form.date_end.value : '';
+    list.push({ id: uid(), title: form.title.value.trim(), date: form.date.value, date_end: dateEnd, time: form.time.value, type: form.type.value, team: form.team.value, notes: form.notes.value.trim() });
     const tn = list[list.length - 1];
     Store.set('termine', list); form.reset();
     renderTermine(); renderCalendar(); updateNextEvent();
@@ -592,10 +632,24 @@ function saveRoster(r) { Store.set('roster', r); renderRoster(); }
 function addPlayer(tid) {
   const name = prompt('Name des Spielers / IGN:'); if (!name) return;
   const r = getRoster(); const t = r.teams.find(x => x.id === tid); if (!t) return;
-  const role = prompt('Rolle (z.B. Rifler · Entry):', '') || '';
-  const lvl = prompt('FACEIT Level (z.B. 🇩🇪 LVL 7):', '🇩🇪 LVL ') || '';
-  (t.players = t.players || []).push({ id: 'p_' + uid(), name: name.trim(), role: role.trim(), lvl: lvl.trim(), captain: false, faceit: name.trim() });
+  const role = prompt('Rolle (z.B. Rifler · Entry · Allrounder · Second AWP):', '') || '';
+  const lvl = prompt('FACEIT Level (z.B. 🇩🇪 LVL 7) — leer lassen ist ok:', '') || '';
+  const faceit = prompt('FACEIT-Name für den Profil-Link:', name.trim()) || name.trim();
+  const photo = prompt('Bild-URL (optional, leer = Initialen):', '') || '';
+  (t.players = t.players || []).push({ id: 'p_' + uid(), name: name.trim(), role: role.trim(), lvl: lvl.trim(), captain: false, faceit: faceit.trim(), photo: photo.trim() });
   saveRoster(r);
+}
+function setPlayerPhoto(tid, pid) {
+  const r = getRoster(); const t = r.teams.find(x => x.id === tid); if (!t) return;
+  const p = (t.players || []).find(x => x.id === pid); if (!p) return;
+  const url = prompt('Bild-URL für ' + p.name + ' (leer = Initialen):', p.photo || '');
+  if (url === null) return;
+  p.photo = url.trim(); saveRoster(r);
+}
+function resetRosterDefault() {
+  if (!confirm('Roster auf den Standard zurücksetzen?\nAlle manuellen Roster-Änderungen gehen verloren (Termine/Ergebnisse bleiben).')) return;
+  Store.set('roster', JSON.parse(JSON.stringify(DEFAULT_ROSTER)));
+  renderRoster();
 }
 function removePlayer(tid, pid) {
   if (!confirm('Spieler entfernen?')) return;
@@ -633,15 +687,21 @@ function renderRoster() {
     const cards = (t.players || []).map(p => `
       <div class="player-card">
         <div class="player-photo">
-          <div class="player-photo-placeholder">${esc(p.name.slice(0, 2))}</div>
+          ${p.photo ? `<img src="${esc(p.photo)}" alt="${esc(p.name)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : ''}
+          <div class="player-photo-placeholder"${p.photo ? ' style="display:none;"' : ''}>${esc(p.name.slice(0, 2))}</div>
           ${p.captain ? '<div class="player-cap-badge">Captain · IGL</div>' : ''}
           ${p.lvl ? `<div class="player-lvl">${esc(p.lvl)}</div>` : ''}
           ${ROSTER_EDIT ? `<button class="btn btn-danger btn-sm" style="position:absolute;top:8px;right:8px;" onclick="removePlayer('${t.id}','${p.id}')">✕</button>` : ''}
+          ${ROSTER_EDIT ? `<button class="btn btn-ghost btn-sm" style="position:absolute;bottom:8px;left:8px;padding:3px 7px;" onclick="setPlayerPhoto('${t.id}','${p.id}')" title="Foto setzen">📷</button>` : ''}
         </div>
         <div class="player-info">
           <div class="player-name">${esc(p.name)}</div>
           <div class="player-role">${esc(p.role || '')}</div>
-          ${p.faceit ? `<div class="player-flag"><a href="https://www.faceit.com/de/players/${encodeURIComponent(p.faceit)}" target="_blank" style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--cyan);">FACEIT →</a></div>` : ''}
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:2px;">
+            ${p.faceit ? `<a href="https://www.faceit.com/de/players/${encodeURIComponent(p.faceit)}" target="_blank" style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--cyan);">FACEIT →</a>` : ''}
+            ${p.twitch ? `<a href="https://www.twitch.tv/${encodeURIComponent(p.twitch)}" target="_blank" style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#9146ff;">Twitch →</a>` : ''}
+          </div>
+          ${p.faceit_id ? `<div class="player-stats" id="fstats-${p.faceit_id}" style="margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted2);display:flex;gap:8px;flex-wrap:wrap;"><span style="opacity:.5;">Lade Stats…</span></div>` : ''}
         </div>
       </div>`).join('');
     let openCards = '';
@@ -657,6 +717,7 @@ function renderRoster() {
         <button class="btn btn-ghost btn-sm" onclick="addStandin('${t.id}')">+ Standin</button>
         <button class="btn btn-ghost btn-sm" onclick="changeOpen('${t.id}',1)">+ offener Spot</button>
         <button class="btn btn-ghost btn-sm" onclick="changeOpen('${t.id}',-1)">– offener Spot</button>
+        <button class="btn btn-ghost btn-sm" onclick="resetRosterDefault()" title="Roster auf Standard zurücksetzen">↺ Standard</button>
       </div>` : '';
     const standins = (t.standins && t.standins.length) ? `
       <hr><div class="card-title">Standins · ${esc(t.name)}</div>
@@ -734,20 +795,36 @@ function cycleAvail(pid, day) {
   a[pid][day] = AV_CYCLE[a[pid][day] || ''];
   Store.set('availability', a); renderAvail();
 }
+function isOnUrlaub(pid, dateStr) {
+  return Store.get('urlaub', []).some(u => u.pid === pid && dateStr >= u.von && dateStr <= u.bis);
+}
+function deleteUrlaub(id) {
+  Store.set('urlaub', Store.get('urlaub', []).filter(u => u.id !== id));
+  renderAvail();
+}
 function renderAvail() {
   const host = document.getElementById('avail-host'); if (!host) return;
   const players = allPlayers().filter(p => p.name.indexOf('(Standin)') === -1);
   const a = Store.get('availability', {});
+  const urlaub = Store.get('urlaub', []);
+  const todayStr = new Date().toISOString().slice(0, 10);
+
   if (!players.length) { host.innerHTML = '<div class="empty-hint">Keine Spieler im Roster.</div>'; return; }
-  host.innerHTML = `<div class="table-wrap"><table class="avail-table">
+
+  // Wochentabelle
+  const tableHtml = `<div class="table-wrap"><table class="avail-table">
     <tr><th class="avail-name">Spieler</th>${AV_DAYS.map(d => `<th>${d}</th>`).join('')}</tr>
-    ${players.map(p => `<tr>
-      <td class="avail-name">${esc(p.name)}<span style="color:var(--muted);font-weight:600;"> · ${esc(p.team)}</span></td>
-      ${AV_DAYS.map(d => {
-        const v = (a[p.id] && a[p.id][d]) || '';
-        return `<td><button class="avail-cell ${v}" onclick="cycleAvail('${p.id}','${d}')" title="Klicken zum Wechseln">${AV_LABEL[v]}</button></td>`;
-      }).join('')}
-    </tr>`).join('')}
+    ${players.map(p => {
+      const onUrlaub = isOnUrlaub(p.id, todayStr);
+      return `<tr${onUrlaub ? ' style="opacity:0.55;"' : ''}>
+        <td class="avail-name">${esc(p.name)}<span style="color:var(--muted);font-weight:600;"> · ${esc(p.team)}</span>${onUrlaub ? ' <span class="badge b-yellow" style="font-size:9px;">🏖 Urlaub</span>' : ''}</td>
+        ${AV_DAYS.map(d => {
+          if (onUrlaub) return `<td><button class="avail-cell no" disabled title="Im Urlaub">✕</button></td>`;
+          const v = (a[p.id] && a[p.id][d]) || '';
+          return `<td><button class="avail-cell ${v}" onclick="cycleAvail('${p.id}','${d}')" title="Klicken zum Wechseln">${AV_LABEL[v]}</button></td>`;
+        }).join('')}
+      </tr>`;
+    }).join('')}
   </table></div>
   <div class="map-legend" style="margin-top:16px;">
     <div class="legend-item"><span class="badge b-green">✓ Verfügbar</span></div>
@@ -755,6 +832,53 @@ function renderAvail() {
     <div class="legend-item"><span class="badge b-red">✕ Nicht</span></div>
     <div class="legend-item" style="color:var(--muted);">Zelle klicken zum Durchschalten</div>
   </div>`;
+
+  // Urlaub-Liste
+  const urlaubRows = urlaub.map(u => {
+    const active = todayStr >= u.von && todayStr <= u.bis;
+    const von = deDate(u.von, {day:'2-digit',month:'2-digit',year:'numeric'});
+    const bis = deDate(u.bis, {day:'2-digit',month:'2-digit',year:'numeric'});
+    return `<div class="event-item">
+      <span class="event-date">${von} – ${bis}</span>
+      <span class="event-dot" style="background:var(--yellow)"></span>
+      <span class="event-title">${esc(u.name)} <span style="color:var(--muted);font-size:11px;">Urlaub / Abwesenheit</span></span>
+      ${active ? '<span class="badge b-yellow">aktiv heute</span>' : ''}
+      <div class="event-actions"><button class="btn btn-danger btn-sm" onclick="deleteUrlaub(\'${u.id}\')">✕</button></div>
+    </div>`;
+  }).join('');
+
+  const urlaubSection = `<div style="margin-top:22px;">
+    <div class="list-section-label" style="margin-bottom:10px;">Eingetragene Abwesenheiten</div>
+    ${urlaub.length ? urlaubRows : '<div class="empty-hint" style="margin:0;">Noch keine Abwesenheiten eingetragen.</div>'}
+  </div>`;
+
+  host.innerHTML = tableHtml + urlaubSection;
+}
+function initUrlaubForm() {
+  const form = document.getElementById('urlaub-form'); if (!form) return;
+  // Spieler-Dropdown befüllen
+  const sel = document.getElementById('urlaub-pid');
+  if (sel) {
+    sel.innerHTML = allPlayers().filter(p => p.name.indexOf('(Standin)') === -1)
+      .map(p => `<option value="${p.id}">${esc(p.name)} · ${esc(p.team)}</option>`).join('');
+  }
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const pid = form.pid.value;
+    const von = form.von.value;
+    const bis = form.bis.value;
+    if (!pid || !von || !bis) return;
+    if (von > bis) { alert('Startdatum muss vor oder gleich dem Enddatum sein.'); return; }
+    const player = allPlayers().find(p => p.id === pid);
+    const list = Store.get('urlaub', []);
+    list.push({ id: uid(), pid, von, bis, name: player ? player.name : pid });
+    Store.set('urlaub', list);
+    form.reset();
+    // Dropdown nach Reset neu setzen (reset löscht Auswahl)
+    if (sel && sel.options.length) sel.selectedIndex = 0;
+    renderAvail();
+    showSaved(form.querySelector('[type=submit]'));
+  });
 }
 
 /* ─── LINEUPS / ANWESENHEIT ───────────────────────────────── */
@@ -983,10 +1107,7 @@ function initOnce() {
   initCupsForm();
   const reb = document.getElementById('roster-edit-btn');
   if (reb) reb.addEventListener('click', toggleRosterEdit);
-  initTaskForm();
-  initLineupForm();
-  initDemoForm();
-  initScoutForm();
+  initScouts();
   initNoteForm();
 }
 // Bei jedem Datenstand neu zeichnen (lokal & nach Cloud-Update)
@@ -1008,10 +1129,49 @@ function renderAll() {
 }
 window.renderAll = renderAll;
 
-document.addEventListener('DOMContentLoaded', () => {
+/* ─── TOAST NOTIFICATION SYSTEM ──────────────────────────── */
+window.toast = (function() {
+  var root;
+  function getRoot() {
+    if (!root) {
+      root = document.getElementById('toast-root');
+      if (!root) {
+        root = document.createElement('div');
+        root.id = 'toast-root';
+        document.body.appendChild(root);
+      }
+    }
+    return root;
+  }
+  function dismiss(t) {
+    if (!t.parentNode) return;
+    t.classList.add('leaving');
+    setTimeout(function() { if (t.parentNode) t.parentNode.removeChild(t); }, 250);
+  }
+  return function toast(msg, type, title) {
+    type = type || 'info';
+    var icons = { success: '✓', error: '✕', info: 'ℹ', warn: '⚠' };
+    var titles = { success: 'Gespeichert', error: 'Fehler', info: 'Info', warn: 'Achtung' };
+    var icon = icons[type] || 'ℹ';
+    var label = title || titles[type] || 'Info';
+    var t = document.createElement('div');
+    t.className = 'toast t-' + type;
+    t.innerHTML =
+      '<span class="toast-icon">' + icon + '</span>' +
+      '<div class="toast-body">' +
+        '<div class="toast-title">' + label + '</div>' +
+        (msg ? '<div class="toast-msg">' + msg + '</div>' : '') +
+      '</div>' +
+      '<button class="toast-close" aria-label="Schließen">×</button>';
+    t.querySelector('.toast-close').addEventListener('click', function() { dismiss(t); });
+    getRoot().appendChild(t);
+    setTimeout(function() { dismiss(t); }, 4000);
+  };
+})();
+
+document.addEventListener('DOMContentLoaded', function() {
   initOnce();
-  renderAll(); // sofortiger Erst-Render aus lokalem Cache
-  // Cloud-Sync übernimmt ab jetzt (falls konfiguriert) — siehe cloud.js
+  renderAll();
   if (window.PortalCloud && typeof PortalCloud.boot === 'function') {
     PortalCloud.boot();
   }

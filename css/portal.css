@@ -667,7 +667,6 @@ hr { border: none; height: 1px; background: linear-gradient(90deg, transparent, 
 /* ─── ROLLEN: Mitglieder ohne Löschrechte ─────────────────── */
 /* Mitglied = ansehen + eintragen + bearbeiten, ABER nicht löschen,
    nicht Roster ändern, nicht Backup importieren (Daten überschreiben). */
-body.role-member .btn-danger,
 body.role-member #roster-edit-btn,
 body.role-member #backup-import { display: none !important; }
 
