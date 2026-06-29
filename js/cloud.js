@@ -28,7 +28,7 @@
   var OWNERS = (window.OWNER_EMAILS || []).map(function (e) { return String(e).toLowerCase().trim(); });
 
   function applyRole(email) {
-    var isOwner = !email || OWNERS.indexOf(String(email).toLowerCase().trim()) > -1;
+    var isOwner = email && OWNERS.indexOf(String(email).toLowerCase().trim()) > -1;
     var role = isOwner ? 'owner' : 'member';
     window.PORTAL_ROLE = role;
     window.PORTAL_EMAIL = email || '';
@@ -36,7 +36,8 @@
     document.body.classList.add('role-' + role);
     return role;
   }
-  applyRole('');
+  // Seite erst nach Auth-Check zeigen (verhindert Content-Flash)
+  document.documentElement.style.visibility = 'hidden';
 
   localStorage.setItem = function (k, v) {
     rawSet(k, v);
@@ -338,6 +339,7 @@
     boot: function () {
       // Localhost-Bypass: kein Login nötig bei lokaler Entwicklung
       if (IS_LOCAL) {
+        document.documentElement.style.visibility = '';
         userEmail = OWNERS[0] || 'local@dev';
         applyRole(userEmail);
         injectChrome(applyRole(userEmail));
@@ -371,6 +373,7 @@
       }
       client = window.supabase.createClient(URL, KEY);
       client.auth.getSession().then(function (res) {
+        document.documentElement.style.visibility = '';
         var s = res.data && res.data.session;
         if (s && s.user) { userEmail = s.user.email; overlay(false); connect(); }
         else { overlay(true); }
