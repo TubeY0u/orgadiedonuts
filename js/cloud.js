@@ -1,10 +1,5 @@
 /* =================================================================
    DieDonuts - Cloud-Sync (Supabase) + Login
-   - Echte Logins (E-Mail/Passwort) + Passwort-Reset
-   - Live-Sync: jede Aenderung (dnd_*) landet sofort bei allen
-   - localStorage bleibt Offline-Puffer
-   - FACEIT Key wird aus Supabase geladen (nicht im Code)
-   - Ohne ausgefuellte supabase-config.js -> Lokal-Modus
    ================================================================= */
 (function () {
   'use strict';
@@ -81,6 +76,8 @@
 
   /* -- Status-Chip ------------------------------------------- */
   function injectChrome(role) {
+    var existing = document.getElementById('cloud-chip');
+    if (existing) existing.remove();
     var roleLabel = role === 'owner' ? 'Owner' : 'Mitglied';
     var isMobile = window.innerWidth <= 768;
     var chip = document.createElement('div');
@@ -94,11 +91,8 @@
     chip.innerHTML =
       '<span id="cloud-dot" style="width:7px;height:7px;border-radius:50%;' +
         'background:var(--muted);flex-shrink:0;transition:background .4s;"></span>' +
-      '<span id="cloud-txt" style="font-size:10px;">verbinde…</span>' +
-      '<button id="cloud-logout" style="margin-left:4px;background:none;border:none;' +
-        'color:var(--pink);font:inherit;font-size:10px;cursor:pointer;">Logout</button>';
+      '<span id="cloud-txt" style="font-size:10px;">verbinde</span>';
     document.body.appendChild(chip);
-    document.getElementById('cloud-logout').addEventListener('click', logout);
 
     var displayName = userEmail ? userEmail.split('@')[0] : 'Nutzer';
     var u = document.querySelector('.sidebar-user .user-name');
@@ -114,7 +108,19 @@
     var t = document.getElementById('cloud-txt');
     if (!d) return;
     d.style.background = live ? 'var(--green)' : 'var(--yellow)';
-    t.textContent = live ? 'Live · sync' : 'sync…';
+    t.textContent = live ? 'Live' : 'sync...';
+  }
+
+  /* -- Logout ------------------------------------------------ */
+  function logout() {
+    if (!confirm('Abmelden?')) return;
+    Object.keys(localStorage).filter(function (k) { return k.indexOf(PREFIX) === 0; })
+      .forEach(function (k) { rawRemove(k); });
+    if (client) {
+      client.auth.signOut().then(function () { location.reload(); });
+    } else {
+      location.reload();
+    }
   }
 
   /* -- Auth-Overlay ------------------------------------------ */
@@ -128,7 +134,6 @@
         'align-items:center;justify-content:center;padding:20px;' +
         'background:radial-gradient(900px 500px at 50% -10%,rgba(255,77,141,.14),transparent 60%),' +
         '#0a0b12;';
-
       o.innerHTML =
         '<div style="max-width:400px;width:100%;' +
           'background:linear-gradient(160deg,#1b1f31 0%,#141725 100%);' +
@@ -144,7 +149,7 @@
               '-webkit-text-fill-color:transparent;">DieDonuts</div>' +
           '</div>' +
           '<div style="font-family:JetBrains Mono,monospace;font-size:10.5px;' +
-            'color:#6b7190;margin-bottom:26px;">Orga-Portal · Anmeldung</div>' +
+            'color:#6b7190;margin-bottom:26px;">Orga-Portal \xb7 Anmeldung</div>' +
           '<div style="margin-bottom:14px;">' +
             '<label style="display:block;font-family:Barlow Condensed,sans-serif;font-size:10px;' +
               'font-weight:800;letter-spacing:1.5px;text-transform:uppercase;' +
@@ -187,7 +192,6 @@
             'Passwort vergessen?' +
           '</button>' +
         '</div>';
-
       document.body.appendChild(o);
 
       var ERR_MAP = [
@@ -195,8 +199,8 @@
         ['Email not confirmed',        'Bitte zuerst die E-Mail bestaetigen.'],
         ['User already registered',    'Diese E-Mail ist bereits registriert.'],
         ['Password should be at least 6 characters', 'Passwort mind. 6 Zeichen.'],
-        ['signup is disabled',         'Registrierung deaktiviert — Lukas kontaktieren.'],
-        ['Email rate limit exceeded',  'Zu viele Versuche. Bitte kurz warten.']
+        ['signup is disabled',         'Registrierung deaktiviert.'],
+        ['Email rate limit exceeded',  'Zu viele Versuche. Bitte warten.']
       ];
       function authErr(msg) {
         var e = document.getElementById('au-err');
@@ -207,74 +211,62 @@
         }
         e.textContent = mapped;
       }
-      function setLoginLoading(loading) {
-        var btn = document.getElementById('au-btn');
-        var reg = document.getElementById('au-reg');
-        var rst = document.getElementById('au-reset');
-        if (btn) { btn.disabled = loading; btn.textContent = loading ? 'Anmelden…' : 'Anmelden'; }
-        if (reg) reg.disabled = loading;
-        if (rst) rst.disabled = loading;
+      function setLoading(on) {
+        var b = document.getElementById('au-btn');
+        var r = document.getElementById('au-reg');
+        if (b) { b.disabled = on; b.textContent = on ? 'Anmelden...' : 'Anmelden'; }
+        if (r) r.disabled = on;
       }
-      function authLogin() {
+      function doLogin() {
         var mail = (document.getElementById('au-mail').value || '').trim();
         var pass = document.getElementById('au-pass').value || '';
         if (!mail || !pass) { authErr('Bitte E-Mail und Passwort eingeben.'); return; }
-        authErr(''); setLoginLoading(true);
+        authErr(''); setLoading(true);
         client.auth.signInWithPassword({ email: mail, password: pass }).then(function (res) {
-          setLoginLoading(false);
+          setLoading(false);
           if (res.error) { authErr(res.error.message); return; }
           userEmail = res.data.user.email;
-          var name = userEmail.split('@')[0];
           overlay(false);
           connect();
-          if (typeof window.toast === 'function') window.toast('Willkommen, ' + name + '!', 'success');
+          if (typeof window.toast === 'function') window.toast('Willkommen, ' + userEmail.split('@')[0] + '!', 'success');
         });
       }
-      function authRegister() {
+      function doRegister() {
         var mail = (document.getElementById('au-mail').value || '').trim();
         var pass = document.getElementById('au-pass').value || '';
         if (!mail || !pass) { authErr('Bitte E-Mail und Passwort eingeben.'); return; }
-        authErr(''); setLoginLoading(true);
+        authErr(''); setLoading(true);
         client.auth.signUp({ email: mail, password: pass }).then(function (res) {
-          setLoginLoading(false);
+          setLoading(false);
           if (res.error) { authErr(res.error.message); return; }
           var e = document.getElementById('au-err');
           if (e) { e.style.color = '#34d399'; e.textContent = 'Konto erstellt! Bitte E-Mail bestaetigen.'; }
         });
       }
-      function authReset2() {
+      function doReset() {
         var mail = (document.getElementById('au-mail').value || '').trim();
-        if (!mail) { authErr('Zuerst E-Mail eingeben, dann auf den Link klicken.'); return; }
-        authErr('');
-        client.auth.resetPasswordForEmail(mail, {
-          redirectTo: location.origin + location.pathname
-        }).then(function (res) {
-          var e = document.getElementById('au-err');
-          if (res.error) { authErr(res.error.message); return; }
-          if (e) { e.style.color = '#34d399'; e.textContent = 'Reset-Link gesendet! Bitte E-Mail pruefen.'; }
-        });
+        if (!mail) { authErr('Zuerst E-Mail eingeben.'); return; }
+        client.auth.resetPasswordForEmail(mail, { redirectTo: location.origin + location.pathname })
+          .then(function (res) {
+            var e = document.getElementById('au-err');
+            if (res.error) { authErr(res.error.message); return; }
+            if (e) { e.style.color = '#34d399'; e.textContent = 'Reset-Link gesendet!'; }
+          });
       }
-      document.getElementById('au-btn').addEventListener('click', authLogin);
-      document.getElementById('au-reg').addEventListener('click', authRegister);
-      document.getElementById('au-reset').addEventListener('click', authReset2);
+      document.getElementById('au-btn').addEventListener('click', doLogin);
+      document.getElementById('au-reg').addEventListener('click', doRegister);
+      document.getElementById('au-reset').addEventListener('click', doReset);
       document.getElementById('au-pass').addEventListener('keydown', function (e) {
-        if (e.key === 'Enter') authLogin();
+        if (e.key === 'Enter') doLogin();
       });
       ['au-mail','au-pass'].forEach(function(id) {
         var el = document.getElementById(id);
         if (!el) return;
-        el.addEventListener('focus', function() { el.style.borderColor = '#ff4d8d'; el.style.boxShadow = '0 0 0 3px rgba(255,77,141,0.15)'; });
-        el.addEventListener('blur',  function() { el.style.borderColor = '#242a40'; el.style.boxShadow = 'none'; });
+        el.addEventListener('focus', function() { el.style.borderColor='#ff4d8d'; el.style.boxShadow='0 0 0 3px rgba(255,77,141,0.15)'; });
+        el.addEventListener('blur',  function() { el.style.borderColor='#242a40'; el.style.boxShadow='none'; });
       });
     }
     if (o && !show) { o.remove(); }
-  }
-
-  function logout() {
-    if (!confirm('Abmelden? Lokale Daten werden aus diesem Browser entfernt (Cloud bleibt erhalten).')) return;
-    Object.keys(localStorage).filter(function (k) { return k.indexOf(PREFIX) === 0; })
-      .forEach(function (k) { rawRemove(k); });
-    client.auth.signOut().then(function () { location.reload(); });
   }
 
   /* -- Verbindung + Realtime ---------------------------------- */
@@ -283,11 +275,7 @@
     injectChrome(role);
     setStatus(false);
     client.from(TABLE).select('key,data').then(function (res) {
-      if (res.error) {
-        setStatus(false);
-        console.error('[Cloud] Laden:', res.error.message);
-        return;
-      }
+      if (res.error) { setStatus(false); console.error('[Cloud] Laden:', res.error.message); return; }
       var cloudKeys = {};
       (res.data || []).forEach(function (row) {
         rawSet(row.key, typeof row.data === 'string' ? row.data : JSON.stringify(row.data));
@@ -298,12 +286,10 @@
       }).forEach(function (k) { schedulePush(k); });
       pushEnabled = true;
 
-      // FACEIT Key aus Supabase laden (nicht im Code/GitHub)
       var faceitRow = (res.data || []).find(function (r) { return r.key === 'faceit_api_key'; });
       if (faceitRow) {
         var fkey = typeof faceitRow.data === 'string'
-          ? faceitRow.data.replace(/^"|"$/g, '')
-          : String(faceitRow.data);
+          ? faceitRow.data.replace(/^"|"$/g, '') : String(faceitRow.data);
         window.FACEIT_API_KEY = fkey;
         if (window.FACEIT_CFG) window.FACEIT_CFG.apiKey = fkey;
         if (typeof renderFaceitWidget === 'function') renderFaceitWidget('faceit-cup-widget');
@@ -312,20 +298,16 @@
 
       reRender();
       setStatus(true);
-
       client.channel('portal-rt')
         .on('postgres_changes', { event: '*', schema: 'public', table: TABLE }, function (payload) {
           if (payload.eventType === 'DELETE') {
             if (payload.old && payload.old.key) rawRemove(payload.old.key);
           } else {
             var row = payload.new;
-            if (row && row.key) {
-              rawSet(row.key, typeof row.data === 'string' ? row.data : JSON.stringify(row.data));
-            }
+            if (row && row.key) rawSet(row.key, typeof row.data === 'string' ? row.data : JSON.stringify(row.data));
           }
           reRender();
-        })
-        .subscribe();
+        }).subscribe();
     });
   }
 
@@ -342,30 +324,20 @@
         injectChrome(applyRole(userEmail));
         setStatus(false);
         var n = document.createElement('div');
-        n.style.cssText =
-          'position:fixed;right:14px;bottom:14px;z-index:480;' +
-          'font-family:JetBrains Mono,monospace;font-size:11px;' +
-          'background:rgba(10,11,18,.92);border:1px solid var(--border2);' +
-          'border-left:3px solid var(--cyan);padding:8px 13px;border-radius:9px;' +
-          'color:var(--muted2);max-width:260px;';
-        n.textContent = '🛠 Dev-Modus · localhost';
+        n.style.cssText = 'position:fixed;right:14px;bottom:14px;z-index:480;font-family:JetBrains Mono,monospace;font-size:11px;background:rgba(10,11,18,.92);border:1px solid var(--border2);border-left:3px solid var(--cyan);padding:8px 13px;border-radius:9px;color:var(--muted2);';
+        n.textContent = 'Dev-Modus \xb7 localhost';
         document.body.appendChild(n);
         return;
       }
       if (!CONFIGURED) {
         var n = document.createElement('div');
-        n.style.cssText =
-          'position:fixed;right:14px;bottom:14px;z-index:480;' +
-          'font-family:JetBrains Mono,monospace;font-size:11px;' +
-          'background:rgba(10,11,18,.92);border:1px solid var(--border2);' +
-          'border-left:3px solid var(--yellow);padding:8px 13px;border-radius:9px;' +
-          'color:var(--muted2);max-width:260px;';
-        n.textContent = '⚠ Lokal-Modus · kein Live-Sync';
+        n.style.cssText = 'position:fixed;right:14px;bottom:14px;z-index:480;font-family:JetBrains Mono,monospace;font-size:11px;background:rgba(10,11,18,.92);border:1px solid var(--border2);border-left:3px solid var(--yellow);padding:8px 13px;border-radius:9px;color:var(--muted2);';
+        n.textContent = 'Lokal-Modus \xb7 kein Live-Sync';
         document.body.appendChild(n);
         return;
       }
       if (!window.supabase || !window.supabase.createClient) {
-        console.error('[Cloud] Supabase-Bibliothek nicht geladen.');
+        console.error('[Cloud] Supabase nicht geladen.');
         return;
       }
       client = window.supabase.createClient(URL, KEY);
@@ -373,9 +345,7 @@
         var s = res.data && res.data.session;
         if (s && s.user) { userEmail = s.user.email; overlay(false); connect(); }
         else { overlay(true); }
-      }).catch(function () {
-        overlay(true);
-      });
+      }).catch(function () { overlay(true); });
     }
   };
   window.PortalCloud = PortalCloud;
