@@ -36,8 +36,6 @@
     document.body.classList.add('role-' + role);
     return role;
   }
-  // Seite erst nach Auth-Check zeigen (verhindert Content-Flash)
-  document.documentElement.style.visibility = 'hidden';
 
   localStorage.setItem = function (k, v) {
     rawSet(k, v);
@@ -372,20 +370,11 @@
         return;
       }
       client = window.supabase.createClient(URL, KEY);
-      // Fallback: nach 4s Seite sowieso zeigen (auch bei Netzwerkfehler)
-      var showTimer = setTimeout(function () {
-        document.documentElement.style.visibility = '';
-        overlay(true);
-      }, 4000);
       client.auth.getSession().then(function (res) {
-        clearTimeout(showTimer);
-        document.documentElement.style.visibility = '';
         var s = res.data && res.data.session;
         if (s && s.user) { userEmail = s.user.email; overlay(false); connect(); }
         else { overlay(true); }
       }).catch(function () {
-        clearTimeout(showTimer);
-        document.documentElement.style.visibility = '';
         overlay(true);
       });
     }
