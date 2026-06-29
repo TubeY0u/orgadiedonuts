@@ -1,9 +1,10 @@
 /* =================================================================
    DieDonuts - Cloud-Sync (Supabase) + Login
    - Echte Logins (E-Mail/Passwort) + Passwort-Reset
-   - Live-Sync: jede Anderung (dnd_*) landet sofort bei allen
+   - Live-Sync: jede Aenderung (dnd_*) landet sofort bei allen
    - localStorage bleibt Offline-Puffer
-   - Ohne ausgefullte supabase-config.js -> Lokal-Modus
+   - FACEIT Key wird aus Supabase geladen (nicht im Code)
+   - Ohne ausgefuellte supabase-config.js -> Lokal-Modus
    ================================================================= */
 (function () {
   'use strict';
@@ -36,6 +37,7 @@
     document.body.classList.add('role-' + role);
     return role;
   }
+  applyRole('');
 
   localStorage.setItem = function (k, v) {
     rawSet(k, v);
@@ -142,7 +144,7 @@
               '-webkit-text-fill-color:transparent;">DieDonuts</div>' +
           '</div>' +
           '<div style="font-family:JetBrains Mono,monospace;font-size:10.5px;' +
-            'color:#6b7190;margin-bottom:26px;">Orga-Portal &middot; Anmeldung</div>' +
+            'color:#6b7190;margin-bottom:26px;">Orga-Portal · Anmeldung</div>' +
           '<div style="margin-bottom:14px;">' +
             '<label style="display:block;font-family:Barlow Condensed,sans-serif;font-size:10px;' +
               'font-weight:800;letter-spacing:1.5px;text-transform:uppercase;' +
@@ -163,124 +165,109 @@
               'color:#eef0f7;border-radius:9px;padding:12px 14px;font-size:16px;' +
               'font-family:Barlow,sans-serif;outline:none;box-sizing:border-box;">' +
           '</div>' +
-          '<div style="text-align:right;margin-bottom:14px;">' +
-            '<button id="au-reset" style="background:none;border:none;color:#6b7190;' +
-              'font-size:11px;font-family:JetBrains Mono,monospace;' +
-              'cursor:pointer;text-decoration:underline;padding:0;">' +
-              'Passwort vergessen?</button>' +
-          '</div>' +
-          '<div id="au-err" style="color:#ff4d6a;font-size:12px;min-height:18px;' +
-            'margin-bottom:14px;font-family:JetBrains Mono,monospace;text-align:center;"></div>' +
-          '<button id="au-login" style="width:100%;margin-bottom:10px;' +
-            'background:linear-gradient(135deg,#ff4d8d,#ff8a3d);color:#fff;border:none;' +
-            'border-radius:10px;padding:13px;font-family:Barlow Condensed,sans-serif;' +
-            'font-size:14px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;' +
-            'cursor:pointer;box-shadow:0 8px 24px -6px rgba(255,77,141,.6);">Anmelden</button>' +
-          '<button id="au-reg" style="width:100%;background:rgba(255,255,255,.03);' +
-            'border:1px solid #2d3454;color:#c2c6d6;border-radius:10px;padding:12px;' +
-            'font-family:Barlow Condensed,sans-serif;font-size:13px;font-weight:800;' +
-            'letter-spacing:1px;text-transform:uppercase;cursor:pointer;">Konto erstellen</button>' +
+          '<div id="au-err" style="font-family:JetBrains Mono,monospace;font-size:11px;' +
+            'color:#f87171;min-height:18px;margin-bottom:14px;"></div>' +
+          '<button id="au-btn"' +
+            ' style="width:100%;padding:13px;border:none;border-radius:10px;cursor:pointer;' +
+            'font-family:Barlow Condensed,sans-serif;font-size:15px;font-weight:800;' +
+            'letter-spacing:1.5px;text-transform:uppercase;' +
+            'background:linear-gradient(135deg,#ff4d8d,#ff8a3d);color:#fff;margin-bottom:10px;">' +
+            'Anmelden' +
+          '</button>' +
+          '<button id="au-reg"' +
+            ' style="width:100%;padding:11px;border:1px solid #2d3454;border-radius:10px;' +
+            'cursor:pointer;font-family:Barlow Condensed,sans-serif;font-size:13px;font-weight:700;' +
+            'letter-spacing:1px;text-transform:uppercase;background:transparent;' +
+            'color:#8b91ad;margin-bottom:10px;">' +
+            'Neues Konto Registrieren' +
+          '</button>' +
+          '<button id="au-reset"' +
+            ' style="width:100%;padding:8px;border:none;background:none;cursor:pointer;' +
+            'font-family:JetBrains Mono,monospace;font-size:10px;color:#6b7190;">' +
+            'Passwort vergessen?' +
+          '</button>' +
         '</div>';
 
       document.body.appendChild(o);
 
-      var mailInput = document.getElementById('au-mail');
-      var passInput = document.getElementById('au-pass');
-
-      [mailInput, passInput].forEach(function (inp) {
-        inp.addEventListener('focus', function () {
-          inp.style.borderColor = '#ff4d8d';
-          inp.style.boxShadow = '0 0 0 3px rgba(255,77,141,.13)';
-        });
-        inp.addEventListener('blur', function () {
-          inp.style.borderColor = '#242a40';
-          inp.style.boxShadow = 'none';
-        });
-      });
-
-      var doLogin = function () { auth('login'); };
-      document.getElementById('au-login').addEventListener('click', doLogin);
-      document.getElementById('au-reg').addEventListener('click', function () { auth('register'); });
-      passInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') doLogin(); });
-      document.getElementById('au-reset').addEventListener('click', authReset);
-    }
-    if (o) o.style.display = show ? 'flex' : 'none';
-  }
-
-  var ERR_MAP = [
-    ['Invalid login credentials',  'E-Mail oder Passwort falsch.'],
-    ['Email not confirmed',        'Bitte zuerst die E-Mail bestätigen.'],
-    ['User already registered',    'Diese E-Mail ist bereits registriert.'],
-    ['Password should be at least 6 characters', 'Passwort mind. 6 Zeichen.'],
-    ['signup is disabled',         'Registrierung deaktiviert — Lukas kontaktieren.'],
-    ['Email rate limit exceeded',  'Zu viele Versuche. Bitte kurz warten.']
-  ];
-
-  function authErr(m) {
-    var e = document.getElementById('au-err');
-    if (!e) return;
-    var msg = m || '';
-    ERR_MAP.forEach(function (pair) { if (msg.indexOf(pair[0]) > -1) msg = pair[1]; });
-    e.style.color = '#ff4d6a';
-    e.textContent = msg;
-  }
-
-  function setLoginLoading(loading) {
-    var btn = document.getElementById('au-login');
-    var reg = document.getElementById('au-reg');
-    if (!btn) return;
-    btn.disabled = loading;
-    if (reg) reg.disabled = loading;
-    btn.textContent = loading ? 'Anmelden…' : 'Anmelden';
-    btn.style.opacity = loading ? '0.7' : '1';
-  }
-
-  function auth(mode) {
-    var mail = (document.getElementById('au-mail').value || '').trim();
-    var pass = document.getElementById('au-pass').value || '';
-    if (!mail || !pass) { authErr('E-Mail und Passwort eingeben.'); return; }
-    authErr('');
-    setLoginLoading(true);
-    var p = mode === 'register'
-      ? client.auth.signUp({ email: mail, password: pass })
-      : client.auth.signInWithPassword({ email: mail, password: pass });
-    p.then(function (res) {
-      setLoginLoading(false);
-      if (res.error) { authErr(res.error.message); return; }
-      if (mode === 'register' && !res.data.session) {
+      var ERR_MAP = [
+        ['Invalid login credentials',  'E-Mail oder Passwort falsch.'],
+        ['Email not confirmed',        'Bitte zuerst die E-Mail bestaetigen.'],
+        ['User already registered',    'Diese E-Mail ist bereits registriert.'],
+        ['Password should be at least 6 characters', 'Passwort mind. 6 Zeichen.'],
+        ['signup is disabled',         'Registrierung deaktiviert — Lukas kontaktieren.'],
+        ['Email rate limit exceeded',  'Zu viele Versuche. Bitte kurz warten.']
+      ];
+      function authErr(msg) {
         var e = document.getElementById('au-err');
-        if (e) {
-          e.style.color = '#34d399';
-          e.textContent = 'Konto erstellt! Bitte E-Mail bestätigen, dann anmelden.';
+        if (!e) return;
+        var mapped = msg;
+        for (var i = 0; i < ERR_MAP.length; i++) {
+          if (msg.indexOf(ERR_MAP[i][0]) > -1) { mapped = ERR_MAP[i][1]; break; }
         }
-        return;
+        e.textContent = mapped;
       }
-      userEmail = (res.data.user && res.data.user.email) || mail;
-      overlay(false);
-      connect();
-      if (typeof window.toast === 'function') {
-        window.toast('Willkommen, ' + userEmail.split('@')[0] + '!', 'success');
+      function setLoginLoading(loading) {
+        var btn = document.getElementById('au-btn');
+        var reg = document.getElementById('au-reg');
+        var rst = document.getElementById('au-reset');
+        if (btn) { btn.disabled = loading; btn.textContent = loading ? 'Anmelden…' : 'Anmelden'; }
+        if (reg) reg.disabled = loading;
+        if (rst) rst.disabled = loading;
       }
-    }).catch(function (err) {
-      setLoginLoading(false);
-      authErr(err.message || 'Verbindungsfehler.');
-    });
-  }
-
-  function authReset() {
-    var mail = (document.getElementById('au-mail').value || '').trim();
-    if (!mail) { authErr('Zuerst E-Mail eingeben, dann auf den Link klicken.'); return; }
-    authErr('');
-    client.auth.resetPasswordForEmail(mail, {
-      redirectTo: location.origin + location.pathname
-    }).then(function (res) {
-      var e = document.getElementById('au-err');
-      if (res.error) { authErr(res.error.message); return; }
-      if (e) {
-        e.style.color = '#34d399';
-        e.textContent = 'Reset-Link gesendet! Bitte E-Mail prüfen.';
+      function authLogin() {
+        var mail = (document.getElementById('au-mail').value || '').trim();
+        var pass = document.getElementById('au-pass').value || '';
+        if (!mail || !pass) { authErr('Bitte E-Mail und Passwort eingeben.'); return; }
+        authErr(''); setLoginLoading(true);
+        client.auth.signInWithPassword({ email: mail, password: pass }).then(function (res) {
+          setLoginLoading(false);
+          if (res.error) { authErr(res.error.message); return; }
+          userEmail = res.data.user.email;
+          var name = userEmail.split('@')[0];
+          overlay(false);
+          connect();
+          if (typeof window.toast === 'function') window.toast('Willkommen, ' + name + '!', 'success');
+        });
       }
-    });
+      function authRegister() {
+        var mail = (document.getElementById('au-mail').value || '').trim();
+        var pass = document.getElementById('au-pass').value || '';
+        if (!mail || !pass) { authErr('Bitte E-Mail und Passwort eingeben.'); return; }
+        authErr(''); setLoginLoading(true);
+        client.auth.signUp({ email: mail, password: pass }).then(function (res) {
+          setLoginLoading(false);
+          if (res.error) { authErr(res.error.message); return; }
+          var e = document.getElementById('au-err');
+          if (e) { e.style.color = '#34d399'; e.textContent = 'Konto erstellt! Bitte E-Mail bestaetigen.'; }
+        });
+      }
+      function authReset2() {
+        var mail = (document.getElementById('au-mail').value || '').trim();
+        if (!mail) { authErr('Zuerst E-Mail eingeben, dann auf den Link klicken.'); return; }
+        authErr('');
+        client.auth.resetPasswordForEmail(mail, {
+          redirectTo: location.origin + location.pathname
+        }).then(function (res) {
+          var e = document.getElementById('au-err');
+          if (res.error) { authErr(res.error.message); return; }
+          if (e) { e.style.color = '#34d399'; e.textContent = 'Reset-Link gesendet! Bitte E-Mail pruefen.'; }
+        });
+      }
+      document.getElementById('au-btn').addEventListener('click', authLogin);
+      document.getElementById('au-reg').addEventListener('click', authRegister);
+      document.getElementById('au-reset').addEventListener('click', authReset2);
+      document.getElementById('au-pass').addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') authLogin();
+      });
+      ['au-mail','au-pass'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('focus', function() { el.style.borderColor = '#ff4d8d'; el.style.boxShadow = '0 0 0 3px rgba(255,77,141,0.15)'; });
+        el.addEventListener('blur',  function() { el.style.borderColor = '#242a40'; el.style.boxShadow = 'none'; });
+      });
+    }
+    if (o && !show) { o.remove(); }
   }
 
   function logout() {
@@ -310,6 +297,19 @@
         return k.indexOf(PREFIX) === 0 && !cloudKeys[k];
       }).forEach(function (k) { schedulePush(k); });
       pushEnabled = true;
+
+      // FACEIT Key aus Supabase laden (nicht im Code/GitHub)
+      var faceitRow = (res.data || []).find(function (r) { return r.key === 'faceit_api_key'; });
+      if (faceitRow) {
+        var fkey = typeof faceitRow.data === 'string'
+          ? faceitRow.data.replace(/^"|"$/g, '')
+          : String(faceitRow.data);
+        window.FACEIT_API_KEY = fkey;
+        if (window.FACEIT_CFG) window.FACEIT_CFG.apiKey = fkey;
+        if (typeof renderFaceitWidget === 'function') renderFaceitWidget('faceit-cup-widget');
+        if (typeof updateFaceitBanner === 'function') updateFaceitBanner();
+      }
+
       reRender();
       setStatus(true);
 
@@ -335,9 +335,7 @@
   var PortalCloud = {
     configured: CONFIGURED,
     boot: function () {
-      // Localhost-Bypass: kein Login nötig bei lokaler Entwicklung
       if (IS_LOCAL) {
-        document.documentElement.style.visibility = '';
         userEmail = OWNERS[0] || 'local@dev';
         applyRole(userEmail);
         injectChrome(applyRole(userEmail));
