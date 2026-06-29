@@ -331,9 +331,28 @@
   }
 
   /* -- Boot -------------------------------------------------- */
+  var IS_LOCAL = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+
   var PortalCloud = {
     configured: CONFIGURED,
     boot: function () {
+      // Localhost-Bypass: kein Login nötig bei lokaler Entwicklung
+      if (IS_LOCAL) {
+        userEmail = OWNERS[0] || 'local@dev';
+        applyRole(userEmail);
+        injectChrome(applyRole(userEmail));
+        setStatus(false);
+        var n = document.createElement('div');
+        n.style.cssText =
+          'position:fixed;right:14px;bottom:14px;z-index:480;' +
+          'font-family:JetBrains Mono,monospace;font-size:11px;' +
+          'background:rgba(10,11,18,.92);border:1px solid var(--border2);' +
+          'border-left:3px solid var(--cyan);padding:8px 13px;border-radius:9px;' +
+          'color:var(--muted2);max-width:260px;';
+        n.textContent = '🛠 Dev-Modus · localhost';
+        document.body.appendChild(n);
+        return;
+      }
       if (!CONFIGURED) {
         var n = document.createElement('div');
         n.style.cssText =
