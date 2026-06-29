@@ -8,8 +8,8 @@
    Solange hier die Platzhalter stehen, läuft das Portal im
    Lokal-Modus (nur dieser Browser, kein Live-Sync).
    ═══════════════════════════════════════════════════════════════ */
-window.SUPABASE_URL      = "https://phyvbcapszuhpyiqpojs.supabase.co";
-window.SUPABASE_ANON_KEY = "sb_publishable_C2cbt1pyhZS_NjiLlWCiVg_fo2B1kcY";
+window.SUPABASE_URL      = "https://jsofqqcpyjmivehxxora.supabase.co";
+window.SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impzb2ZxcWNweWptaXZlaHh4b3JhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkwMzE5NDgsImV4cCI6MjA5NDYwNzk0OH0.hygylZaG4eEU3KvlGof1XL4L7r9Xe5ElO7KPVZDwfxc";
 
 /* ─── Owner / Admin ────────────────────────────────────────────
    Diese E-Mails haben volle Rechte (löschen, Roster bearbeiten,
