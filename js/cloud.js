@@ -334,6 +334,7 @@
 
   var PortalCloud = {
     configured: CONFIGURED,
+    logout: logout,
     boot: function () {
       if (IS_LOCAL) {
         userEmail = OWNERS[0] || 'local@dev';
